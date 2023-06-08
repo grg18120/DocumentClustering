@@ -84,6 +84,10 @@ for dataset_string in config.datasets_strings:
         print(f"labels_true after remove norm0 and NAN values = {len(labels_true)}")
         '''
 
+        # Reduce dimensionality
+        if (config.reduce_dim and vectorizer_string == "sent_transformers_model_embeddings"):
+            X = utils.reduce_dim_umap(X)
+
         all_eval_metric_values = []
         for clustering_algorithms_string in config.clustering_algorithms_strings:
             startTimeClustAlgo = time.time()

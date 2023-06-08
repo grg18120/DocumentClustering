@@ -7,8 +7,9 @@ import DocClust.utils as utils
 # Config values. 
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
+reduce_dim = True
 n_jobs = None
-test_dataset = False
+test_dataset = True
 limit_corpus_size = 0
 
 # ------------------------ Datasets - Corpus ------------------------ #
@@ -24,9 +25,9 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    "tfidf",
-    #"sent_transformers_model_embeddings",
-    "spacy_model_embeddings"
+    #"tfidf"
+    "sent_transformers_model_embeddings"
+    #"spacy_model_embeddings"
 ]
 
 def vectorizers_pointers():
@@ -133,17 +134,17 @@ def clustering_algorithms_pointers():
 
 # ------------------------ Ext Evaluation Metrics ------------------------ #
 evaluation_metrics_strings = [
-   "f1_score",
-   "f1_score_relabel"
-   #"mutual_information",
-   #"adjusted_mutual_information",
-    #"jaccard_score",
-    #"rand_index",
-    #"adjusted_rand_index",
-    #"fowlkes_mallows_index",
-    #"v_measure_index",
-    #"homogenity",
-    #"completeness"
+    "f1_score",
+    "f1_score_relabel",
+    "mutual_information",
+    "adjusted_mutual_information",
+    "jaccard_score",
+    "rand_index",
+    "adjusted_rand_index",
+    "fowlkes_mallows_index",
+    "v_measure_index",
+    "homogenity",
+    "completeness"
 ]
 
 def evaluation_metrics_pointers():

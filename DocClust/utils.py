@@ -10,6 +10,7 @@ import time
 #import DocClust.config
 import DocClust.config as config
 from tqdm import tqdm 
+import umap
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -121,6 +122,23 @@ def tfidf(corpus, labels_true):
 
     return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
 
+
+# ------------------------ REDUCE DIMENSIONALITY ------------------------ #
+def reduce_dim_umap(vectors):
+    """
+    n_neighbors: default 15, The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
+    n_components: default 2, The dimension of the space to embed into.
+    metric: default 'euclidean', The metric to use to compute distances in high dimensional space.
+    min_dist: default 0.1, The effective minimum distance between embedded points.
+    """
+
+    reducer = umap.UMAP(
+        n_neighbors=15,
+        n_components=2, 
+        metric='euclidean', #'hellinger'
+        min_dist=0.1
+    )
+    return reducer.fit_transform(vectors)
 
 # ------------------------ ENGLISH DATASETS ------------------------ #
 from sklearn.datasets import fetch_20newsgroups
