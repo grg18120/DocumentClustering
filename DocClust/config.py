@@ -7,10 +7,10 @@ import DocClust.utils as utils
 # Config values. 
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
-reduce_dim = True
+reduce_dim = False
 n_jobs = None
-test_dataset = True
-limit_corpus_size = 0
+test_dataset = False
+limit_corpus_size = 200
 
 # ------------------------ Datasets - Corpus ------------------------ #
 
@@ -25,14 +25,16 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    #"tfidf"
-    "sent_transformers_model_embeddings"
-    #"spacy_model_embeddings"
+    "tfidf",
+    "sent_transformers_model_embeddings",
+    "spacy_model_embeddings"
+    #"sent_transformers_model_embeddings-umap"
 ]
 
 def vectorizers_pointers():
     return {
         "sent_transformers_model_embeddings": utils.sent_transformers_model_embeddings,
+        #"sent_transformers_model_embeddings-umap": utils.sent_transformers_model_embeddings,
         "spacy_model_embeddings": utils.spacy_model_embeddings,
         "tfidf": utils.tfidf
     }
@@ -40,14 +42,14 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-    "kmeans",
-    "kmedoids",
-    "agglomerative",
-    "birch",
-    "dbscan",
-    "meanshift",
-    "optics",
-    "common_nn"
+    # "kmeans",
+    # "kmedoids",
+    # "agglomerative",
+    # "birch",
+    "dbscan"
+    # "meanshift",
+    # "optics",
+    # "common_nn"
 ]
 
 # Config Clustering algorithm approaches

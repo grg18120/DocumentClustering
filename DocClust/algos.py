@@ -6,6 +6,9 @@ from sklearn.cluster import Birch
 from sklearn_extra.cluster import CommonNNClustering
 from sklearn.cluster import MeanShift
 from sklearn.cluster import OPTICS
+from sklearn.neighbors import NearestNeighbors
+from matplotlib import pyplot as plt
+
 import numpy as np
 
 random_state = 42
@@ -53,10 +56,22 @@ def birch(X, n_clusters):
 
 
 def dbscan(X, algorithm, n_jobs):
+    # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
+
+    # Estimate eps distance 
+    distances, indices = NearestNeighbors(n_neighbors=2, algorithm='kd_tree').fit(X).kneighbors(X)
+    distances = np.sort(distances, axis=0)
+    distances = distances[:,1]
+    distances_dev = np.diff(distances)
+    max_val_index = np.where(distances_dev == np.amax(distances_dev))[0][0]
+    e = distances[max_val_index]
+    #print("e = ",e)
+    #plt.plot(distances)
+
     return DBSCAN(
-        eps = 0.5, 
+        eps = e, 
         min_samples = 5,
         algorithm = algorithm, 
         leaf_size = 30,

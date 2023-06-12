@@ -131,12 +131,11 @@ def reduce_dim_umap(vectors):
     metric: default 'euclidean', The metric to use to compute distances in high dimensional space.
     min_dist: default 0.1, The effective minimum distance between embedded points.
     """
-
     reducer = umap.UMAP(
-        n_neighbors=15,
-        n_components=2, 
-        metric='euclidean', #'hellinger'
-        min_dist=0.1
+        n_neighbors = 15,
+        n_components = 2, 
+        metric = 'euclidean', #'hellinger'
+        min_dist = 0.1
     )
     return reducer.fit_transform(vectors)
 

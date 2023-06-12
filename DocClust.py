@@ -5,6 +5,8 @@ import DocClust.config as config
 import DocClust.utils as utils
 import DocClust.experiments as experiments
 
+# Create directories if they doesnt exist to store vectors-embedding 
+experiments.create_serialized_vectors_dirs()
 
 # Load Models to create embeddings
 [spacy_model_en, spacy_model_gr, sent_transorfmers_model] = utils.load_models(config.vectorizers_strings)
@@ -26,7 +28,6 @@ for dataset_string in config.datasets_strings:
             "The truck is driven on the highway",
             " "
         ]
-        #labels_true = [0, 2, 0, 2, 2, 0, 1, 0, 1, 1]
         labels_true = [2, 0, 2, 0, 0, 2, 1, 2, 1, 1]
         n_clusters = len(set(labels_true))
     else:
@@ -49,22 +50,24 @@ for dataset_string in config.datasets_strings:
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ",len(corpus))
     
-
-    # Remove empty text documents
-    '''
-    print(f"Corpus Size = {len(corpus)}")
-    print(f"labels_true_corpus  = {len(labels_true)}")
-    corpus, labels_true, n_clusters = remove_empty_documents(corpus, labels_true)
-    labels_true_corpus = labels_true[:]
-    print(f"Corpus Size afte remove empty = {len(corpus)}")
-    print(f"labels_true_corpus Size afte remove empty = {len(labels_true_corpus)}")
-    '''
-    
     for vectorizer_string in config.vectorizers_strings:
         startTimeVectorizer = time.time()
-        if (vectorizer_string == "tfidf"): X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [labels_true_corpus])
-        if (vectorizer_string == "spacy_model_embeddings"): X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] + [labels_true_corpus])
-        if (vectorizer_string == "sent_transformers_model_embeddings"): X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transorfmers_model]+ [labels_true_corpus])
+        if (vectorizer_string == "tfidf"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 100):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:   
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [labels_true_corpus])
+        if (vectorizer_string == "spacy_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 100):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] + [labels_true_corpus])
+        if (vectorizer_string == "sent_transformers_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 100):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transorfmers_model]+ [labels_true_corpus])
+
         print("\n\n*******************************************************************")
         print("*******************************************************************")
         print(f"Vectorization Method: {vectorizer_string}")
@@ -74,19 +77,13 @@ for dataset_string in config.datasets_strings:
         
         # Remove vectors with vector = nparray([nan, nan, ......, nan]) or vector_norm = 0
         print(f"X Size = {len(X)}")
+        print(f"X Shape = {X.shape}")
         print(f"labels_true Size = {len(labels_true)}")
-        '''
-        #labels_true = labels_true_corpus[:]
-        print(f"X Size = {len(X)}")
-        print(f"labels_true Size = {len(labels_true)}")
-        X, labels_true, n_clusters = remove_zeronorm_nan_vectors(X, labels_true, vectorizer_string)
-        print(f"X Size afte remove norm0 and NAN values = {len(X)}")
-        print(f"labels_true after remove norm0 and NAN values = {len(labels_true)}")
-        '''
 
         # Reduce dimensionality
         if (config.reduce_dim and vectorizer_string == "sent_transformers_model_embeddings"):
             X = utils.reduce_dim_umap(X)
+            print("reduce dimensions UMAP")
 
         all_eval_metric_values = []
         for clustering_algorithms_string in config.clustering_algorithms_strings:

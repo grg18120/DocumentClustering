@@ -1,5 +1,6 @@
 from functools import reduce
 import os
+import pickle
 import pandas as pd
 import numpy as np
 from DocClust.config import * 
@@ -48,3 +49,69 @@ def clust_algo_to_csv(clustering_algorithms_string, parameters, arguments):
     return reduce(
         lambda x,y: f"{x}|{y}", [f"{clustering_algorithms_string}"] + [f"{a}:{b}" for a, b in zip(parameters, map(str, arguments))]   
     )
+
+
+def create_serialized_vectors_dirs():
+    """
+    Create folder for each dataset for each vectorize approach
+    to store pickle files for each document
+    """
+    path = "precomputed_vectors\\"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    for datasets_folder in datasets_strings:
+        if not os.path.exists("".join([path,datasets_folder,"\\"])):
+            os.makedirs("".join([path,datasets_folder,"\\"])) 
+    
+    for datasets_folder in datasets_strings:
+        for vectorizer_folder in vectorizers_strings:
+            if not os.path.exists("".join([path,datasets_folder,"\\",vectorizer_folder])):
+                os.makedirs("".join([path,datasets_folder,"\\",vectorizer_folder]))
+
+
+def check_folder_size(dataset_string, vectorizer_string):
+    path = "precomputed_vectors\\"
+    path = "".join([path,dataset_string,"\\",vectorizer_string,"\\"])
+    return os.path.getsize(path)
+        
+
+def store_serialized_vector(dataset_string, vectorizer_string, vectors, labels_true):
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true"
+    dbfile = open(file_path, "ab")
+    pickle.dump(labels_true, dbfile)                     
+    dbfile.close()
+
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape"
+    dbfile = open(file_path, "ab")
+    pickle.dump(vectors.shape, dbfile)                     
+    dbfile.close()
+
+    for indx, vector in enumerate(vectors):
+        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}"
+        dbfile = open(file_path, "ab")
+        pickle.dump(vector, dbfile)                     
+        dbfile.close()
+
+
+def load_deselialized_vector(dataset_string, vectorizer_string):
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape"
+    dbfile = open(file_path, 'rb')     
+    shape = pickle.load(dbfile)
+    dbfile.close()
+
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true"
+    dbfile = open(file_path, 'rb')     
+    labels_true = pickle.load(dbfile)
+    dbfile.close()
+
+    arr = np.array([])
+    for indx in range(shape[0]):
+        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}"
+        dbfile = open(file_path, "rb")
+        vector = pickle.load(dbfile)     
+        arr = np.append(arr, vector)            
+        dbfile.close()
+
+    arr = arr.reshape(shape)
+    return arr, labels_true
