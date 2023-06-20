@@ -6,35 +6,38 @@ import DocClust.utils as utils
 
 # Config values. 
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
+figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 debug = False
 reduce_dim = False
+nn = 10
 n_jobs = None
 test_dataset = False
-limit_corpus_size = 200
+limit_corpus_size = 0
 
 # ------------------------ Datasets - Corpus ------------------------ #
 
 datasets_strings = [
-    "20newsgroups"
+    #"20newsgroups"
+    "test"
 ]
 
 def datasets_pointers():
     return {
-        "20newsgroups": utils.load_dataset_20newsgroups
+        "20newsgroups": utils.load_dataset_20newsgroups,
+        "test": utils.load_dataset_test
     }
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    "tfidf",
-    "sent_transformers_model_embeddings",
-    "spacy_model_embeddings"
-    #"sent_transformers_model_embeddings-umap"
+    #"tfidf",
+    #"spacy_model_embeddings",
+    "sent_transformers_model_embeddings"
+    
 ]
 
 def vectorizers_pointers():
     return {
         "sent_transformers_model_embeddings": utils.sent_transformers_model_embeddings,
-        #"sent_transformers_model_embeddings-umap": utils.sent_transformers_model_embeddings,
         "spacy_model_embeddings": utils.spacy_model_embeddings,
         "tfidf": utils.tfidf
     }
@@ -42,14 +45,14 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-    # "kmeans",
-    # "kmedoids",
-    # "agglomerative",
-    # "birch",
-    "dbscan"
-    # "meanshift",
-    # "optics",
-    # "common_nn"
+     #"kmeans",
+     #"kmedoids",
+     #"agglomerative",
+     #"birch",
+     "dbscan"
+     #"meanshift",
+     #"optics",
+     #"common_nn"
 ]
 
 # Config Clustering algorithm approaches
@@ -64,7 +67,7 @@ def clustering_algorithms_parameteres():
         "birch":
             ['n_clusters'],
         "dbscan":
-            ['algorithm', 'n_jobs'],
+            ['n_clusters', 'algorithm', 'n_jobs'],
         "meanshift": 
             ['bin_seeding', 'n_jobs'],
         "optics":
@@ -101,8 +104,8 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters]
         ],
         "dbscan":[
-            ['kd_tree', n_jobs],
-            ['ball_tree', n_jobs]
+            [n_clusters, 'kd_tree', n_jobs]
+            #['ball_tree', n_jobs]
         ],
         "meanshift": [
             [False, n_jobs], 

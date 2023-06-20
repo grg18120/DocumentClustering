@@ -1,3 +1,4 @@
+import DocClust.config as config
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
@@ -7,7 +8,11 @@ from sklearn_extra.cluster import CommonNNClustering
 from sklearn.cluster import MeanShift
 from sklearn.cluster import OPTICS
 from sklearn.neighbors import NearestNeighbors
+from kneed import KneeLocator
 from matplotlib import pyplot as plt
+import time
+
+
 
 import numpy as np
 
@@ -55,29 +60,72 @@ def birch(X, n_clusters):
     ).fit(X).labels_
 
 
-def dbscan(X, algorithm, n_jobs):
+def dbscan(X, n_clusters, algorithm, n_jobs):
     # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
+    # Xnormed = X
 
-    # Estimate eps distance 
-    distances, indices = NearestNeighbors(n_neighbors=2, algorithm='kd_tree').fit(X).kneighbors(X)
-    distances = np.sort(distances, axis=0)
-    distances = distances[:,1]
-    distances_dev = np.diff(distances)
-    max_val_index = np.where(distances_dev == np.amax(distances_dev))[0][0]
-    e = distances[max_val_index]
-    #print("e = ",e)
-    #plt.plot(distances)
+    # nearest_neighbors = NearestNeighbors(n_neighbors = config.nn)
+    # neighbors = nearest_neighbors.fit(Xnormed)
+    # distances, indices = neighbors.kneighbors(Xnormed)
+    # distances = np.sort(distances[:,config.nn - 1], axis = 0)
 
-    return DBSCAN(
-        eps = e, 
-        min_samples = 5,
-        algorithm = algorithm, 
-        leaf_size = 30,
-        metric = 'euclidean',
-        n_jobs = n_jobs
-    ).fit(Xnormed).labels_
+    # i = np.arange(len(distances))
+    # knee = KneeLocator(i, distances, S=1, curve='convex', direction='increasing', interp_method='polynomial')
+    # knee2 = KneeLocator(i, distances, S=1, curve='concave', direction='increasing', interp_method='polynomial')
+
+    # e = knee.knee_y
+    # e2 = knee2.knee_y
+
+    # tmpi = [i for i, x in enumerate(distances) if i%10 == 0]
+    # tmpx = [x for i, x in enumerate(distances) if i%10 == 0]
+    # fig, ax = plt.subplots()
+    # ax.plot(tmpi, tmpx, linewidth=2.0)
+    # ax.hlines(y = [e, (e+e2)/2.0, e2], color = 'r', xmin = 0, xmax = X.shape[0])
+    # plt.show()
+
+
+    # print("e = ",distances[knee.knee])
+    # print("e2 = ",distances[knee2.knee])
+
+    e = 0.5
+    step = 0.4
+    labels_pred = [-1]
+    i = 0
+    num_clusters = 1
+    while(num_clusters < n_clusters and abs(step) > 0.01):
+
+        dist_clust = set([x for x in labels_pred if x != -1])
+        prev_num_clusters = len(dist_clust)
+
+        labels_pred = DBSCAN(
+            eps = e, 
+            min_samples = config.nn,
+            algorithm = algorithm, 
+            leaf_size = 30,
+            metric = 'euclidean',
+            n_jobs = n_jobs
+        ).fit(Xnormed).labels_
+
+        num_minus1 = len([x for x in labels_pred if x == -1])
+        num_zeroclust = len([x for x in labels_pred if x == 0])
+        dist_clust = set([x for x in labels_pred if x != -1])
+        num_clusters = len(dist_clust)
+
+        if (num_minus1 == X.shape[0]):
+            step = step/2
+        elif (num_zeroclust == X.shape[0]):
+            step = - step/2
+        elif (prev_num_clusters > num_clusters):
+            step = - step / 2.0
+
+        print(f"loop:{i} eps:{e} step:{step}   conunt(-1):{num_minus1}   DistClust:{dist_clust}")
+        e = e + step
+        i+=1
+        time.sleep(2)
+    
+    return labels_pred
 
 
 def meanshift(X, bin_seeding, n_jobs):

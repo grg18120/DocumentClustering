@@ -124,6 +124,7 @@ def tfidf(corpus, labels_true):
 
 
 # ------------------------ REDUCE DIMENSIONALITY ------------------------ #
+
 def reduce_dim_umap(vectors):
     """
     n_neighbors: default 15, The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
@@ -132,7 +133,7 @@ def reduce_dim_umap(vectors):
     min_dist: default 0.1, The effective minimum distance between embedded points.
     """
     reducer = umap.UMAP(
-        n_neighbors = 15,
+        n_neighbors = config.nn,
         n_components = 2, 
         metric = 'euclidean', #'hellinger'
         min_dist = 0.1
@@ -150,6 +151,23 @@ def load_dataset_20newsgroups():
     )
     return [newsgroups_dataset.data, list(newsgroups_dataset.target), len(newsgroups_dataset.target_names)]
 
+ 
+def load_dataset_test():
+    corpus = [
+        "",
+        'data science is one of the most important fields of science',
+        'Game of Thrones is an amazing TV series!',
+        'this is one of the best data science courses',
+        'data scientists analyze data',
+        'Game of Thrones is the best TV series!',
+        "The car is driven on the road",
+        'Game of Thrones is so great.',
+        "The truck is driven on the highway",
+        " "
+    ]
+    labels_true = [2, 0, 2, 0, 0, 2, 1, 2, 1, 1]
+    n_clusters = len(set(labels_true))
+    return [corpus, labels_true, n_clusters]
  
 '''
 

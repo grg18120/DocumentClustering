@@ -4,6 +4,9 @@ import pickle
 import pandas as pd
 import numpy as np
 from DocClust.config import * 
+import matplotlib
+matplotlib.pyplot.ion()
+from matplotlib import pyplot as plt
 
 
 def save_csv(dataset_name, vectorizer, n_clusters, all_eval_metric_values):
@@ -115,3 +118,24 @@ def load_deselialized_vector(dataset_string, vectorizer_string):
 
     arr = arr.reshape(shape)
     return arr, labels_true
+
+
+def plotClustResults(X, labels, dataset_string, clustering_algorithms_string):
+    colors = []
+    for l in labels:
+        if l == 0:
+            colors.append('red')
+        elif l == 1:
+            colors.append('blue')
+        elif l == 2:
+            colors.append('green')
+        else:
+            colors.append('black')
+
+    fig, ax = plt.subplots()
+    for i, (xy, color) in enumerate(zip(X, colors)):
+        ax.set_title("".join([dataset_string, " - ", clustering_algorithms_string]))
+        ax.plot(xy[0], xy[1],'o',color=color, picker = True) 
+        ax.text(xy[0], xy[1], str(i))
+    fig.savefig("".join([figures_dir ,dataset_string, " - ", clustering_algorithms_string]))  
+    
