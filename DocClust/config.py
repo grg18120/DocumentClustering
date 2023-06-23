@@ -9,7 +9,7 @@ csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 debug = False
 reduce_dim = False
-nn = 10
+nn = 2
 n_jobs = None
 test_dataset = False
 limit_corpus_size = 0
@@ -17,14 +17,16 @@ limit_corpus_size = 0
 # ------------------------ Datasets - Corpus ------------------------ #
 
 datasets_strings = [
-    #"20newsgroups"
-    "test"
+    "20newsgroups"
+    #"test",
+    #"blobs"
 ]
 
 def datasets_pointers():
     return {
         "20newsgroups": utils.load_dataset_20newsgroups,
-        "test": utils.load_dataset_test
+        "test": utils.load_dataset_test,
+        "blobs":utils.load_dataset_blobs
     }
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #

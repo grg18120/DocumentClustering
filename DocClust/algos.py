@@ -1,4 +1,6 @@
 import DocClust.config as config
+
+import DocClust.metrics as metrics  
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
@@ -11,6 +13,7 @@ from sklearn.neighbors import NearestNeighbors
 from kneed import KneeLocator
 from matplotlib import pyplot as plt
 import time
+
 
 
 
@@ -60,22 +63,23 @@ def birch(X, n_clusters):
     ).fit(X).labels_
 
 
-def dbscan(X, n_clusters, algorithm, n_jobs):
+def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
     # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
     # Xnormed = X
 
-    # nearest_neighbors = NearestNeighbors(n_neighbors = config.nn)
-    # neighbors = nearest_neighbors.fit(Xnormed)
-    # distances, indices = neighbors.kneighbors(Xnormed)
-    # distances = np.sort(distances[:,config.nn - 1], axis = 0)
+    nearest_neighbors = NearestNeighbors(n_neighbors = config.nn)
+    neighbors = nearest_neighbors.fit(Xnormed)
+    distances, indices = neighbors.kneighbors(Xnormed)
+    distances = np.sort(distances[:,config.nn - 1], axis = 0)
 
-    # i = np.arange(len(distances))
-    # knee = KneeLocator(i, distances, S=1, curve='convex', direction='increasing', interp_method='polynomial')
+    i = np.arange(len(distances))
+    knee = KneeLocator(i, distances, S=1, curve='convex', direction='increasing', interp_method='polynomial')
     # knee2 = KneeLocator(i, distances, S=1, curve='concave', direction='increasing', interp_method='polynomial')
 
-    # e = knee.knee_y
+    e = knee.knee_y
+    print(f"Proposal eps:{e}")
     # e2 = knee2.knee_y
 
     # tmpi = [i for i, x in enumerate(distances) if i%10 == 0]
@@ -89,18 +93,47 @@ def dbscan(X, n_clusters, algorithm, n_jobs):
     # print("e = ",distances[knee.knee])
     # print("e2 = ",distances[knee2.knee])
 
-    e = 0.5
-    step = 0.4
-    labels_pred = [-1]
-    i = 0
-    num_clusters = 1
-    while(num_clusters < n_clusters and abs(step) > 0.01):
+    # e = 1.007
+    # step = - 0.1
+    # labels_pred = [-1]
+    # i = 0
+    # num_clusters = 1
+    # # num_clusters < n_clusters and
+    # while( abs(step) > 0.001):
 
-        dist_clust = set([x for x in labels_pred if x != -1])
-        prev_num_clusters = len(dist_clust)
+    #     dist_clust = set([x for x in labels_pred if x != -1])
+    #     prev_num_clusters = len(dist_clust)
+    #     prev_num_minus1 = len([x for x in labels_pred if x == -1])
 
-        labels_pred = DBSCAN(
-            eps = e, 
+    #     labels_pred = DBSCAN(
+    #         eps = e, 
+    #         min_samples = config.nn,
+    #         algorithm = algorithm, 
+    #         leaf_size = 30,
+    #         metric = 'euclidean',
+    #         n_jobs = n_jobs
+    #     ).fit(Xnormed).labels_
+
+    #     num_minus1 = len([x for x in labels_pred if x == -1])
+    #     num_zeroclust = len([x for x in labels_pred if x == 0])
+    #     dist_clust = set([x for x in labels_pred if x != -1])
+    #     num_clusters = len(dist_clust)
+
+    #     if prev_num_clusters < num_clusters :
+    #         e = e - step 
+    #         step = step / 1.5
+    #     if prev_num_clusters >= num_clusters and prev_num_minus1 < num_minus1 and prev_num_clusters > 1:
+    #         e = e - step 
+    #         step = step / 1.5
+
+    #     print(f"loop:{i} eps:{e} step:{step}   conunt(-1):{num_minus1}   DistClust:{dist_clust}")
+    #     e = e + step
+    #     i+=1
+    #     time.sleep(1)
+
+    def dbs(ee):
+        return DBSCAN(
+            eps = ee, 
             min_samples = config.nn,
             algorithm = algorithm, 
             leaf_size = 30,
@@ -108,24 +141,56 @@ def dbscan(X, n_clusters, algorithm, n_jobs):
             n_jobs = n_jobs
         ).fit(Xnormed).labels_
 
-        num_minus1 = len([x for x in labels_pred if x == -1])
-        num_zeroclust = len([x for x in labels_pred if x == 0])
-        dist_clust = set([x for x in labels_pred if x != -1])
-        num_clusters = len(dist_clust)
-
-        if (num_minus1 == X.shape[0]):
-            step = step/2
-        elif (num_zeroclust == X.shape[0]):
-            step = - step/2
-        elif (prev_num_clusters > num_clusters):
-            step = - step / 2.0
-
-        print(f"loop:{i} eps:{e} step:{step}   conunt(-1):{num_minus1}   DistClust:{dist_clust}")
-        e = e + step
-        i+=1
-        time.sleep(2)
     
-    return labels_pred
+    step = 0.05
+    eps_values = np.arange(0.06, 1.2, step).tolist()
+    eps_new_values = []
+    evaluation_metrics = []
+    
+    
+    for i in range(len(eps_values)):
+        e = eps_values[i]
+        labels_pred = dbs(e)
+        
+        metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        eps_new_values.append(e)
+        print(f"eps:{e}  metric:{metrics_value}")
+        #print(f"labels_pred:{labels_true}")
+        #print(f"labels_pred:{labels_pred}\n")
+
+        tmp = [x for x in evaluation_metrics if metrics_value - x >= 0.05]
+        if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
+            evaluation_metrics.append(metrics_value)
+
+            ee = e - step/2.0
+            if ee not in eps_new_values:
+                labels_pred = dbs(ee)
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                eps_new_values.append(ee)
+                evaluation_metrics.append(metrics_value)
+                print(f"eps:{ee}  metric:{metrics_value}")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+            
+            ee = e + step/2.0
+            if ee not in eps_new_values:
+                labels_pred = dbs(ee)
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                eps_new_values.append(ee)
+                evaluation_metrics.append(metrics_value)
+                print(f"eps:{ee}  metric:{metrics_value} ")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+        else:
+            evaluation_metrics.append(metrics_value)
+
+    print("\nBest Value")
+    max_eval_metric = max(evaluation_metrics)
+    max_index = evaluation_metrics.index(max_eval_metric)
+    max_eps = eps_new_values[max_index]
+    print(f"eps:{max_eps} metric:{max_eval_metric}    ")
+
+    return dbs(max_eps)
 
 
 def meanshift(X, bin_seeding, n_jobs):

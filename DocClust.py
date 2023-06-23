@@ -75,16 +75,17 @@ for dataset_string in config.datasets_strings:
             X = utils.reduce_dim_umap(X)
             print("reduce dimensions UMAP")
 
-        n_clusters = 3
-        centers = [[1, 1], [-1, -1], [1, -1]]
-        X, labels_true,  = make_blobs(n_samples=750, centers=centers, cluster_std=0.4, random_state=0)
+
+        # n_clusters = 3
+        # centers = [[1, 1], [-1, -1], [1, -1]]
+        # X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4, random_state=0)
 
         all_eval_metric_values = []
         for clustering_algorithms_string in config.clustering_algorithms_strings:
             startTimeClustAlgo = time.time()
             arguments_list = config.clustering_algorithms_arguments(n_clusters).get(clustering_algorithms_string)
             for arguments in arguments_list:
-                labels_pred = list(utils.wrapper_args(config.clustering_algorithms_pointers().get(clustering_algorithms_string), [X] + arguments))
+                labels_pred = list(utils.wrapper_args(config.clustering_algorithms_pointers().get(clustering_algorithms_string), [X]+ [labels_true] + arguments ))
                 
                 print("-------------------------------------\n")
                 if (dataset_string == "test"): print(f"labels_true = {labels_true}")

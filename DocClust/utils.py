@@ -11,6 +11,7 @@ import time
 import DocClust.config as config
 from tqdm import tqdm 
 import umap
+from sklearn.datasets import make_blobs
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -167,6 +168,13 @@ def load_dataset_test():
     ]
     labels_true = [2, 0, 2, 0, 0, 2, 1, 2, 1, 1]
     n_clusters = len(set(labels_true))
+    return [corpus, labels_true, n_clusters]
+
+def load_dataset_blobs():
+    corpus = ["blobs"]
+    n_clusters = 3
+    centers = [[1, 1], [-1, -1], [1, -1]]
+    X, labels_true = make_blobs(n_samples = 750, centers = centers, cluster_std = 0.4, random_state = 0)
     return [corpus, labels_true, n_clusters]
  
 '''
