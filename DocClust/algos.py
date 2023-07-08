@@ -1,6 +1,6 @@
 import DocClust.config as config
-
 import DocClust.metrics as metrics  
+import DocClust.utils as utils
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import AgglomerativeClustering
@@ -21,7 +21,7 @@ import numpy as np
 
 random_state = 42
 
-def kmeans(X, n_clusters, algorithm, init_centers):
+def kmeans(X, labels_true, n_clusters, algorithm, init_centers):
     return KMeans(
         n_clusters = n_clusters, 
         init = init_centers, 
@@ -32,7 +32,7 @@ def kmeans(X, n_clusters, algorithm, init_centers):
     ).fit(X).labels_
 
 
-def kmedoids(X, n_clusters, method, init_centers):
+def kmedoids(X, labels_true, n_clusters, method, init_centers):
     return KMedoids(
         n_clusters = n_clusters,
         metric = 'cosine',
@@ -43,7 +43,7 @@ def kmedoids(X, n_clusters, method, init_centers):
     ).fit(X).labels_
 
 
-def agglomerative(X,n_clusters, compute_full_tree, linkage, metric):
+def agglomerative(X, labels_true, n_clusters, compute_full_tree, linkage, metric):
     return AgglomerativeClustering(
         n_clusters = n_clusters, 
         metric = metric, 
@@ -55,7 +55,7 @@ def agglomerative(X,n_clusters, compute_full_tree, linkage, metric):
     ).fit(X).labels_
 
 
-def birch(X, n_clusters):
+def birch(X, labels_true, n_clusters):
     return Birch(
         branching_factor = 50,
         n_clusters = n_clusters, 
@@ -64,72 +64,20 @@ def birch(X, n_clusters):
 
 
 def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
+    print("-------------------------------------\n")
+
     # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
-    # Xnormed = X
 
-    nearest_neighbors = NearestNeighbors(n_neighbors = config.nn)
-    neighbors = nearest_neighbors.fit(Xnormed)
-    distances, indices = neighbors.kneighbors(Xnormed)
-    distances = np.sort(distances[:,config.nn - 1], axis = 0)
-
-    i = np.arange(len(distances))
-    knee = KneeLocator(i, distances, S=1, curve='convex', direction='increasing', interp_method='polynomial')
-    # knee2 = KneeLocator(i, distances, S=1, curve='concave', direction='increasing', interp_method='polynomial')
-
-    e = knee.knee_y
-    print(f"Proposal eps:{e}")
-    # e2 = knee2.knee_y
-
-    # tmpi = [i for i, x in enumerate(distances) if i%10 == 0]
-    # tmpx = [x for i, x in enumerate(distances) if i%10 == 0]
-    # fig, ax = plt.subplots()
-    # ax.plot(tmpi, tmpx, linewidth=2.0)
-    # ax.hlines(y = [e, (e+e2)/2.0, e2], color = 'r', xmin = 0, xmax = X.shape[0])
-    # plt.show()
-
-
-    # print("e = ",distances[knee.knee])
-    # print("e2 = ",distances[knee2.knee])
-
-    # e = 1.007
-    # step = - 0.1
-    # labels_pred = [-1]
-    # i = 0
-    # num_clusters = 1
-    # # num_clusters < n_clusters and
-    # while( abs(step) > 0.001):
-
-    #     dist_clust = set([x for x in labels_pred if x != -1])
-    #     prev_num_clusters = len(dist_clust)
-    #     prev_num_minus1 = len([x for x in labels_pred if x == -1])
-
-    #     labels_pred = DBSCAN(
-    #         eps = e, 
-    #         min_samples = config.nn,
-    #         algorithm = algorithm, 
-    #         leaf_size = 30,
-    #         metric = 'euclidean',
-    #         n_jobs = n_jobs
-    #     ).fit(Xnormed).labels_
-
-    #     num_minus1 = len([x for x in labels_pred if x == -1])
-    #     num_zeroclust = len([x for x in labels_pred if x == 0])
-    #     dist_clust = set([x for x in labels_pred if x != -1])
-    #     num_clusters = len(dist_clust)
-
-    #     if prev_num_clusters < num_clusters :
-    #         e = e - step 
-    #         step = step / 1.5
-    #     if prev_num_clusters >= num_clusters and prev_num_minus1 < num_minus1 and prev_num_clusters > 1:
-    #         e = e - step 
-    #         step = step / 1.5
-
-    #     print(f"loop:{i} eps:{e} step:{step}   conunt(-1):{num_minus1}   DistClust:{dist_clust}")
-    #     e = e + step
-    #     i+=1
-    #     time.sleep(1)
+    # return DBSCAN(
+    #     eps = 0.5, 
+    #     min_samples = config.nn,
+    #     algorithm = algorithm, 
+    #     leaf_size = 30,
+    #     metric = 'euclidean',
+    #     n_jobs = n_jobs
+    # ).fit(Xnormed).labels_
 
     def dbs(ee):
         return DBSCAN(
@@ -142,15 +90,254 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
         ).fit(Xnormed).labels_
 
     
+    step = 0.01
+    eps_values = np.arange(0.6, 0.9, step).tolist()
+    # eps_new_values = []
+    # evaluation_metrics = []
+    
+    
+    for i in range(len(eps_values)):
+        e = eps_values[i]
+        labels_pred = dbs(e)
+        
+        # metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        # eps_new_values.append(e)
+        print(f" -- eps:{e} -- ")
+
+        #print(f"eps:{e}  metric:{metrics_value}")
+        #print(f"labels_pred:{labels_true}")
+        #print(f"labels_pred:{labels_pred}\n")
+
+        # tmp = [x for x in evaluation_metrics]
+        # if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
+        #     evaluation_metrics.append(metrics_value)
+
+        #     ee = e - step/2.0
+        #     if ee not in eps_new_values:
+        #         labels_pred = dbs(ee)
+        #         metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        #         eps_new_values.append(ee)
+        #         evaluation_metrics.append(metrics_value)
+        #         print(f"eps:{ee}  metric:{metrics_value}")
+        #         #print(f"labels_pred:{labels_true}")
+        #         #print(f"labels_pred:{labels_pred}\n")
+            
+        #     ee = e + step/2.0
+        #     if ee not in eps_new_values:
+        #         labels_pred = dbs(ee)
+        #         metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        #         eps_new_values.append(ee)
+        #         evaluation_metrics.append(metrics_value)
+        #         print(f"eps:{ee}  metric:{metrics_value} ")
+        #         #print(f"labels_pred:{labels_true}")
+        #         #print(f"labels_pred:{labels_pred}\n")
+        # else:
+        #     evaluation_metrics.append(metrics_value)
+
+
+        for evaluation_metric_string in config.evaluation_metrics_strings:
+            score  = utils.wrapper_args(config.evaluation_metrics_pointers().get(evaluation_metric_string),[list(labels_true), list(labels_pred)])
+            print(f"{evaluation_metric_string} = {score}")
+
+        print("\n\n")
+
+    # evaluation_metrics.append(metrics_value)
+    # print("\nBest Value")
+    # max_eval_metric = max(evaluation_metrics)
+    # max_index = evaluation_metrics.index(max_eval_metric)
+    # max_eps = eps_new_values[max_index]
+    # print(f"eps:{max_eps} metric:{max_eval_metric}    ")
+
+    max_eps = 1
+
+    return dbs(max_eps)
+
+
+def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
+    print("-------------------------------------\n")
+
+    Xnorm = np.linalg.norm(X.astype(float), axis = 1)
+    Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
+
+    return MeanShift(
+        #bandwidth = bb,
+        bin_seeding = bin_seeding,
+        n_jobs = n_jobs 
+    ).fit(Xnormed).labels_
+
+
+    def ms(bb):
+        return MeanShift(
+            bandwidth = bb,
+            bin_seeding = False,
+            n_jobs = n_jobs 
+        ).fit(X).labels_
+
+    
     step = 0.05
-    eps_values = np.arange(0.06, 1.2, step).tolist()
+    b_values = np.arange(0.8, 1.2, step).tolist()
+    b_new_values = []
+    evaluation_metrics = []
+    
+    
+    for i in range(len(b_values)):
+        b = b_values[i]
+        labels_pred = ms(b)
+        
+        metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        b_new_values.append(b)
+        print(f"bandwidth:{b}  metric:{metrics_value}")
+        #print(f"labels_pred:{labels_true}")
+        #print(f"labels_pred:{labels_pred}\n")
+
+        tmp = [x for x in evaluation_metrics]
+        if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
+            evaluation_metrics.append(metrics_value)
+
+            bb = b - step/2.0
+            if bb not in b_new_values:
+                labels_pred = ms(bb)
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                b_new_values.append(bb)
+                evaluation_metrics.append(metrics_value)
+                print(f"bandwidth:{bb}  metric:{metrics_value}")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+            
+            bb = b + step/2.0
+            if bb not in b_new_values:
+                labels_pred = ms(bb)
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                b_new_values.append(bb)
+                evaluation_metrics.append(metrics_value)
+                print(f"bandwidth:{bb}  metric:{metrics_value} ")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+        else:
+            evaluation_metrics.append(metrics_value)
+
+    print("\nBest Value")
+    max_eval_metric = max(evaluation_metrics)
+    max_index = evaluation_metrics.index(max_eval_metric)
+    max_b = b_new_values[max_index]
+    print(f"bandwidth:{max_b} metric:{max_eval_metric}    ")
+
+    return ms(max_b)
+
+
+def optics(X, labels_true, n_clusters, cluster_method, algorithm, n_jobs):
+    print("-------------------------------------\n")
+    Xnorm = np.linalg.norm(X.astype(float), axis = 1)
+    Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
+
+    return OPTICS(
+        min_samples = config.nn,  
+        #metric = 'euclidean', 
+        p = 2, 
+        cluster_method = cluster_method, 
+        algorithm = algorithm, 
+        leaf_size = 30,
+        n_jobs = n_jobs
+    ).fit(Xnormed).labels_
+
+    def optc(n_n):
+        return OPTICS(
+            min_samples = n_n,  
+            #metric = 'euclidean', 
+            p = 2, 
+            cluster_method = cluster_method, 
+            algorithm = algorithm, 
+            leaf_size = 30,
+            n_jobs = n_jobs
+        ).fit(Xnormed).labels_
+    
+    step = 100
+    nn_values = np.arange(900, 1000, step).tolist()
+    nn_new_values = []
+    evaluation_metrics = []
+
+    for i in range(len(nn_values)):
+        nn = nn_values[i]
+        labels_pred = optc(int(nn))
+        
+        metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+        nn_new_values.append(nn)
+        print(f"nn:{nn}  metric:{metrics_value}")
+        #print(f"labels_pred:{labels_true}")
+        #print(f"labels_pred:{labels_pred}\n")
+
+        tmp = [x for x in evaluation_metrics if metrics_value - x >= 0.05]
+        if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
+            evaluation_metrics.append(metrics_value)
+
+            nn_n = nn - step/2.0
+            if nn_n not in nn_new_values:
+                labels_pred = optc(int(nn_n))
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                nn_new_values.append(nn_n)
+                evaluation_metrics.append(metrics_value)
+                print(f"nn:{nn_n}  metric:{metrics_value}")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+            
+            nn_n = nn + step/2.0
+            if nn_n not in nn_new_values:
+                labels_pred = optc(int(nn_n))
+                metrics_value = metrics.v_measure_index(labels_true, labels_pred)
+                nn_new_values.append(nn_n)
+                evaluation_metrics.append(metrics_value)
+                print(f"nn:{nn_n}  metric:{metrics_value} ")
+                #print(f"labels_pred:{labels_true}")
+                #print(f"labels_pred:{labels_pred}\n")
+        else:
+            evaluation_metrics.append(metrics_value)
+
+    print("\nBest Value")
+    max_eval_metric = max(evaluation_metrics)
+    max_index = evaluation_metrics.index(max_eval_metric)
+    max_nn = nn_new_values[max_index]
+    print(f"nn:{max_nn} metric:{max_eval_metric}    ")
+
+    return optc(int(max_nn))
+    
+
+
+
+def common_nn(X, labels_true, n_clusters, algorithm, n_jobs):
+    Xnorm = np.linalg.norm(X.astype(float), axis = 1)
+    Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
+
+    return CommonNNClustering(
+		eps = 0.5, 
+		min_samples = 5, 
+		metric = 'euclidean', 
+		algorithm = algorithm,
+		leaf_size = 30, 
+		p = 1,
+        n_jobs = n_jobs
+	).fit(Xnormed).labels_
+
+    def cnn(ee):
+        return CommonNNClustering(
+            eps = ee, 
+            min_samples = config.nn, 
+            #metric = 'euclidean', 
+            algorithm = algorithm,
+            leaf_size = 30, 
+            p = 2,
+            n_jobs = n_jobs
+        ).fit(Xnormed).labels_
+
+    
+    step = 0.03
+    eps_values = np.arange(0.4, 1.5, step).tolist()
     eps_new_values = []
     evaluation_metrics = []
     
     
     for i in range(len(eps_values)):
         e = eps_values[i]
-        labels_pred = dbs(e)
+        labels_pred = cnn(e)
         
         metrics_value = metrics.v_measure_index(labels_true, labels_pred)
         eps_new_values.append(e)
@@ -164,7 +351,7 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
 
             ee = e - step/2.0
             if ee not in eps_new_values:
-                labels_pred = dbs(ee)
+                labels_pred = cnn(ee)
                 metrics_value = metrics.v_measure_index(labels_true, labels_pred)
                 eps_new_values.append(ee)
                 evaluation_metrics.append(metrics_value)
@@ -174,7 +361,7 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
             
             ee = e + step/2.0
             if ee not in eps_new_values:
-                labels_pred = dbs(ee)
+                labels_pred = cnn(ee)
                 metrics_value = metrics.v_measure_index(labels_true, labels_pred)
                 eps_new_values.append(ee)
                 evaluation_metrics.append(metrics_value)
@@ -190,40 +377,4 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
     max_eps = eps_new_values[max_index]
     print(f"eps:{max_eps} metric:{max_eval_metric}    ")
 
-    return dbs(max_eps)
-
-
-def meanshift(X, bin_seeding, n_jobs):
-    return MeanShift(
-#        bandwidth = 1000.0,
-        bin_seeding = bin_seeding,
-        n_jobs = n_jobs 
-    ).fit(X).labels_
-
-
-def optics(X, cluster_method, algorithm, n_jobs):
-    Xnorm = np.linalg.norm(X.astype(float), axis = 1)
-    Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
-    return OPTICS(
-		min_samples = 5,  
-		metric = 'euclidean', 
-		p = 1, 
-		cluster_method = cluster_method, 
-		algorithm = algorithm, 
-		leaf_size = 30,
-        n_jobs = n_jobs
-	).fit(Xnormed).labels_
-
-
-def common_nn(X, algorithm, n_jobs):
-    Xnorm = np.linalg.norm(X.astype(float), axis = 1)
-    Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
-    return CommonNNClustering(
-		eps = 0.5, 
-		min_samples = 5, 
-		metric = 'euclidean', 
-		algorithm = algorithm,
-		leaf_size = 30, 
-		p = 1,
-        n_jobs = n_jobs
-	).fit(Xnormed).labels_
+    return cnn(max_eps)

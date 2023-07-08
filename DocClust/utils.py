@@ -58,14 +58,14 @@ def spacy_model_embeddings(corpus, spacy_model, labels_true):
     
             vector_list = [token.vector for token in doc if spacy_useful_token(token)]
             # vector_list to np array
-            doc_vector = np.mean(vector_list, axis=0)
+            doc_vector = np.mean(vector_list, axis = 0)
 
             # remove nan value & zero elements vectors
             if np.any(doc_vector) and isinstance(doc_vector,np.ndarray):
                 doc_vectors.append(doc_vector)
                 doc_indx.append(index)
 
-    return np.array(doc_vectors, dtype = object) , [labels_true[x] for x in doc_indx]
+    return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
 
 
 def sent_transformers_model_embeddings(corpus, spacy_model, sent_transorfmers_model, labels_true):
@@ -134,12 +134,17 @@ def reduce_dim_umap(vectors):
     min_dist: default 0.1, The effective minimum distance between embedded points.
     """
     reducer = umap.UMAP(
-        n_neighbors = config.nn,
-        n_components = 2, 
-        metric = 'euclidean', #'hellinger'
+        n_neighbors = 15,
+        n_components = 20, 
+        metric = 'cosine',
         min_dist = 0.1
     )
     return reducer.fit_transform(vectors)
+
+
+def parameter_tuning():
+    pass
+
 
 # ------------------------ ENGLISH DATASETS ------------------------ #
 from sklearn.datasets import fetch_20newsgroups

@@ -9,7 +9,7 @@ csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 debug = False
 reduce_dim = False
-nn = 2
+nn = 75
 n_jobs = None
 test_dataset = False
 limit_corpus_size = 0
@@ -18,7 +18,7 @@ limit_corpus_size = 0
 
 datasets_strings = [
     "20newsgroups"
-    #"test",
+    #"test"
     #"blobs"
 ]
 
@@ -54,6 +54,7 @@ clustering_algorithms_strings = [
      "dbscan"
      #"meanshift",
      #"optics",
+     #"meanshift",
      #"common_nn"
 ]
 
@@ -71,11 +72,11 @@ def clustering_algorithms_parameteres():
         "dbscan":
             ['n_clusters', 'algorithm', 'n_jobs'],
         "meanshift": 
-            ['bin_seeding', 'n_jobs'],
+            ['n_clusters', 'bin_seeding', 'n_jobs'],
         "optics":
-            ['cluster_method', 'algorithm', 'n_jobs'],
+            ['n_clusters','cluster_method', 'algorithm', 'n_jobs'],
         "common_nn":
-            ['algorithm', 'n_jobs']
+            ['n_clusters', 'algorithm', 'n_jobs']
     }
 
 def clustering_algorithms_arguments(n_clusters):
@@ -106,22 +107,22 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters]
         ],
         "dbscan":[
-            [n_clusters, 'kd_tree', n_jobs]
-            #['ball_tree', n_jobs]
+            [n_clusters, 'kd_tree', n_jobs],
+            [n_clusters, 'ball_tree', n_jobs]
         ],
         "meanshift": [
-            [False, n_jobs], 
-            [True, n_jobs]
+            [n_clusters, False, n_jobs],
+            [n_clusters, True, n_jobs]
         ],
         "optics":[
-            ['xi', 'kd_tree', n_jobs],
-            ['xi', 'ball_tree', n_jobs],
-            ['dbscan', 'kd_tree', n_jobs],
-            ['dbscan', 'ball_tree', n_jobs]
+            [n_clusters, 'xi', 'kd_tree', n_jobs],
+            [n_clusters, 'xi', 'ball_tree', n_jobs],
+            [n_clusters, 'dbscan', 'kd_tree', n_jobs],
+            [n_clusters, 'dbscan', 'kd_tree', n_jobs]
         ],
         "common_nn":[
-            ['kd_tree', n_jobs],
-            ['ball_tree', n_jobs]
+            [n_clusters, 'kd_tree', n_jobs],
+            [n_clusters, 'ball_tree', n_jobs]
         ]
     }
         
@@ -141,11 +142,9 @@ def clustering_algorithms_pointers():
 
 # ------------------------ Ext Evaluation Metrics ------------------------ #
 evaluation_metrics_strings = [
-    "f1_score",
-    "f1_score_relabel",
+    "accuracy",
     "mutual_information",
     "adjusted_mutual_information",
-    "jaccard_score",
     "rand_index",
     "adjusted_rand_index",
     "fowlkes_mallows_index",
@@ -156,11 +155,9 @@ evaluation_metrics_strings = [
 
 def evaluation_metrics_pointers():
     return {
-        "f1_score": metrics.f1_score,
-        "f1_score_relabel": metrics.f1_score_relabel,
+        "accuracy": metrics.accuracy,
         "mutual_information": metrics.mutual_information,
         "adjusted_mutual_information": metrics.adjusted_mutual_information,
-        "jaccard_score": metrics.jaccard_score, 
         "rand_index": metrics.rand_index,
         "adjusted_rand_index": metrics.adjusted_rand_index,
         "fowlkes_mallows_index": metrics.fowlkes_mallows_index,

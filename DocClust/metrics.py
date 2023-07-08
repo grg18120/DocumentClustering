@@ -1,6 +1,6 @@
 from sklearn import metrics 
-from scipy.optimize import linear_sum_assignment as linear_assignment
 import numpy as np
+from coclust.evaluation.external import accuracy as ext_accuracy
 
 """
 External evaluation, clustering is compared to an existing "ground truth" classification
@@ -72,36 +72,5 @@ def normalized_mutual_information(labels_true, labels_pred):
 	return metrics.normalized_mutual_info_score(labels_true, labels_pred)
 
 
-def pairwise_distances(cl_a, cl_b, metric):
-	return metrics.pairwise_distances(cl_a, cl_b, metric = metric)
-
-
-def f1_score(labels_true, labels_pred):
-	return metrics.f1_score(labels_true, labels_pred, average = 'macro')
-
-
-def f1_score_relabel(labels_true, labels_pred):
-
-	def make_cm_cost(cm):
-		s = np.max(cm)
-		return (- cm + s)
-	
-	# Permutation maximizing the sum of the diagonal elements - apply Hungarian algorithm
-	cm = metrics.confusion_matrix(labels_true, labels_pred)
-	indexes = linear_assignment(make_cm_cost(cm))
-	change_from = indexes[0].tolist()
-	change_to = indexes[1].tolist()
-	can_update = [1] * len(labels_true)
-	
-	labels_pred_relabel = labels_pred[:]
-	for x_index,x in enumerate(change_from):
-		for y_index,y in enumerate(labels_pred):
-			if y == x and can_update[y_index] == 1:
-				can_update[y_index] = -1
-				labels_pred_relabel[y_index] = change_to[x_index] 
-
-	return metrics.f1_score(labels_true, labels_pred_relabel, average = 'macro')
-
-
-def jaccard_score(labels_true, labels_pred):
-	return metrics.jaccard_score(labels_true, labels_pred, average = 'macro')
+def accuracy(labels_true, labels_pred):
+	return ext_accuracy(labels_true, labels_pred)

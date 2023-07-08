@@ -12,25 +12,25 @@ from sklearn.datasets import make_blobs
 experiments.create_serialized_vectors_dirs()
 
 # Load Models to create embeddings
-[spacy_model_en, spacy_model_gr, sent_transorfmers_model] = utils.load_models(config.vectorizers_strings)
+[spacy_model_en, spacy_model_gr, sent_transformers_model] = utils.load_models(config.vectorizers_strings)
 
 # Main Loops
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
    
     # Limit size of corpus
-    if (config.limit_corpus_size>1):
+    if (config.limit_corpus_size > 1):
         corpus_size = len(corpus)
-        test_sub_corpus = int(corpus_size/config.limit_corpus_size)
+        test_sub_corpus = int(corpus_size / config.limit_corpus_size)
         corpus = corpus[0:test_sub_corpus]
         labels_true = labels_true[0:test_sub_corpus]
         n_clusters = len(set(labels_true))
         corpus_size = len(corpus)
 
-    print("Corpus Size before clean: ",len(corpus))
+    print("Corpus Size before clean: ", len(corpus))
     corpus, labels_true = utils.clean_corpus(corpus, labels_true)
     labels_true_corpus = labels_true[:]
-    print("Corpus Size After clean: ",len(corpus))
+    print("Corpus Size After clean: ", len(corpus))
 
     # sss = set(labels_true)
     # axx = plt.hist(labels_true, density=False, bins=list(sss))   
@@ -40,7 +40,6 @@ for dataset_string in config.datasets_strings:
     for vectorizer_string in config.vectorizers_strings:
         startTimeVectorizer = time.time()
         if (vectorizer_string == "tfidf"): 
-            ssssss = experiments.check_folder_size(dataset_string, vectorizer_string)
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:   
@@ -56,7 +55,7 @@ for dataset_string in config.datasets_strings:
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transorfmers_model]+ [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transformers_model]+ [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
 
         print("\n\n*******************************************************************")
@@ -85,18 +84,16 @@ for dataset_string in config.datasets_strings:
             startTimeClustAlgo = time.time()
             arguments_list = config.clustering_algorithms_arguments(n_clusters).get(clustering_algorithms_string)
             for arguments in arguments_list:
-                labels_pred = list(utils.wrapper_args(config.clustering_algorithms_pointers().get(clustering_algorithms_string), [X]+ [labels_true] + arguments ))
+                #labels_pred = list(utils.wrapper_args(config.clustering_algorithms_pointers().get(clustering_algorithms_string), [X] + arguments ))
+                labels_pred = list(utils.wrapper_args(config.clustering_algorithms_pointers().get(clustering_algorithms_string), [X] + [labels_true] + arguments ))
                 
-                print("-------------------------------------\n")
+                
                 if (dataset_string == "test"): print(f"labels_true = {labels_true}")
                 if (dataset_string == "test"): print(f"labels_pred = {labels_pred}")
                 #print(f"labels_true = {labels_true}")
                 #print(f"labels_pred = {labels_pred}")
 
-                if (config.reduce_dim and vectorizer_string == "sent_transformers_model_embeddings" and dataset_string == "test"):
-                    experiments.plotClustResults(X, labels_pred, dataset_string, clustering_algorithms_string)
-
-                print(f"{clustering_algorithms_string}({arguments})")
+                print(f"\n{clustering_algorithms_string}({arguments})\n")
 
                 for evaluation_metric_string in config.evaluation_metrics_strings:
                     score  = utils.wrapper_args(config.evaluation_metrics_pointers().get(evaluation_metric_string),[list(labels_true), list(labels_pred)])
