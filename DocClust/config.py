@@ -7,9 +7,10 @@ import DocClust.utils as utils
 # Config values. 
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
+parameters_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
 reduce_dim = False
-nn = 75
+nn = 3
 n_jobs = None
 test_dataset = False
 limit_corpus_size = 0
@@ -17,9 +18,9 @@ limit_corpus_size = 0
 # ------------------------ Datasets - Corpus ------------------------ #
 
 datasets_strings = [
-    "20newsgroups"
+    #"20newsgroups"
     #"test"
-    #"blobs"
+    "blobs"
 ]
 
 def datasets_pointers():
@@ -51,9 +52,9 @@ clustering_algorithms_strings = [
      #"kmedoids",
      #"agglomerative",
      #"birch",
-     "dbscan"
-     #"meanshift",
-     #"optics",
+     #"dbscan"
+     #"meanshift"
+     "optics"
      #"meanshift",
      #"common_nn"
 ]
@@ -115,10 +116,10 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters, True, n_jobs]
         ],
         "optics":[
-            [n_clusters, 'xi', 'kd_tree', n_jobs],
-            [n_clusters, 'xi', 'ball_tree', n_jobs],
-            [n_clusters, 'dbscan', 'kd_tree', n_jobs],
-            [n_clusters, 'dbscan', 'kd_tree', n_jobs]
+            [n_clusters, 'xi', 'kd_tree', n_jobs]
+            #[n_clusters, 'xi', 'ball_tree', n_jobs],
+            #[n_clusters, 'dbscan', 'kd_tree', n_jobs],
+            #[n_clusters, 'dbscan', 'kd_tree', n_jobs]
         ],
         "common_nn":[
             [n_clusters, 'kd_tree', n_jobs],

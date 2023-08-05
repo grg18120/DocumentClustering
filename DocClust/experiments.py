@@ -1,12 +1,13 @@
 from functools import reduce
+import csv
 import os
 import pickle
 import pandas as pd
 import numpy as np
 from DocClust.config import * 
-import matplotlib
-matplotlib.pyplot.ion()
-from matplotlib import pyplot as plt
+# import matplotlib
+# matplotlib.pyplot.ion()
+# from matplotlib import pyplot as plt
 
 
 def save_csv(dataset_name, vectorizer, n_clusters, all_eval_metric_values):

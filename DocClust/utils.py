@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import functools
 import time
+import csv
 #import DocClust.config
 import DocClust.config as config
 from tqdm import tqdm 
@@ -142,8 +143,35 @@ def reduce_dim_umap(vectors):
     return reducer.fit_transform(vectors)
 
 
-def parameter_tuning():
-    pass
+def parameter_tuning(algo_func, algo_string, labels_true, parameter_range, step):
+    parameter_values = np.arange(parameter_range[0], parameter_range[1], step).tolist()
+    csv_rows = []
+    for i in range(len(parameter_values)):
+
+        print(f" -- eps:{parameter_values[i]} -- ")
+        labels_pred = algo_func(parameter_values[i])
+        
+        csv_row = [parameter_values[i]]
+        for evaluation_metric_string in config.evaluation_metrics_strings:
+            score  = wrapper_args(config.evaluation_metrics_pointers().get(evaluation_metric_string),[list(labels_true), list(labels_pred)])
+            csv_row.append(round(score, 4))
+            print(f"{evaluation_metric_string} = {score}")
+        csv_rows.append(csv_row)
+        print("\n\n")
+
+    parameters_tuning_csv("Parameter",csv_rows,"".join([algo_string, str(config.nn)]))
+
+
+def parameters_tuning_csv(parameter_name, data, csv_name):
+    csv_file_path = "".join([config.parameters_dir, csv_name, ".csv"])
+    with open(csv_file_path, 'w', newline='') as csvfile:
+        # Create a CSV writer object
+        writer = csv.writer(csvfile)
+        
+        writer.writerow([parameter_name] + config.evaluation_metrics_strings)
+        # Write the data to the CSV file
+        for row in data:
+            writer.writerow(row)
 
 
 # ------------------------ ENGLISH DATASETS ------------------------ #

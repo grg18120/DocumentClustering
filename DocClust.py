@@ -6,7 +6,7 @@ import DocClust.utils as utils
 import DocClust.experiments as experiments
 from matplotlib import pyplot as plt
 from sklearn.datasets import make_blobs
-
+import os
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
