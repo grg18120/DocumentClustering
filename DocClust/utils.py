@@ -144,7 +144,11 @@ def reduce_dim_umap(vectors):
 
 
 def parameter_tuning(algo_func, algo_string, labels_true, parameter_range, step):
-    parameter_values = np.arange(parameter_range[0], parameter_range[1], step).tolist()
+    if (step == 0):
+        parameter_values = parameter_range
+    else:
+        parameter_values = np.arange(parameter_range[0], parameter_range[1], step).tolist()
+        
     csv_rows = []
     for i in range(len(parameter_values)):
 

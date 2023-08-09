@@ -10,7 +10,8 @@ figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentC
 parameters_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
 reduce_dim = False
-nn = 3
+nn = 200
+min_cluster_size = 20
 n_jobs = None
 test_dataset = False
 limit_corpus_size = 0
@@ -52,9 +53,10 @@ clustering_algorithms_strings = [
      #"kmedoids",
      #"agglomerative",
      #"birch",
-     #"dbscan"
-     #"meanshift"
-     "optics"
+     #"dbscan",
+     "hdbscan",
+     #"meanshift",
+     #"optics",
      #"meanshift",
      #"common_nn"
 ]
@@ -72,6 +74,8 @@ def clustering_algorithms_parameteres():
             ['n_clusters'],
         "dbscan":
             ['n_clusters', 'algorithm', 'n_jobs'],
+        "hdbscan":
+            ['n_clusters', 'cluster_selection_method'],
         "meanshift": 
             ['n_clusters', 'bin_seeding', 'n_jobs'],
         "optics":
@@ -111,15 +115,19 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters, 'kd_tree', n_jobs],
             [n_clusters, 'ball_tree', n_jobs]
         ],
+        "hdbscan":[
+            [n_clusters, 'eom'],
+            [n_clusters, 'leaf']
+        ],
         "meanshift": [
             [n_clusters, False, n_jobs],
-            [n_clusters, True, n_jobs]
+            # [n_clusters, True, n_jobs]
         ],
         "optics":[
-            [n_clusters, 'xi', 'kd_tree', n_jobs]
-            #[n_clusters, 'xi', 'ball_tree', n_jobs],
-            #[n_clusters, 'dbscan', 'kd_tree', n_jobs],
-            #[n_clusters, 'dbscan', 'kd_tree', n_jobs]
+            [n_clusters, 'xi', 'kd_tree', n_jobs],
+            [n_clusters, 'xi', 'ball_tree', n_jobs],
+            [n_clusters, 'dbscan', 'kd_tree', n_jobs],
+            [n_clusters, 'dbscan', 'kd_tree', n_jobs]
         ],
         "common_nn":[
             [n_clusters, 'kd_tree', n_jobs],
@@ -134,6 +142,7 @@ def clustering_algorithms_pointers():
         "agglomerative": algos.agglomerative,
         "birch": algos.birch,
         "dbscan": algos.dbscan,
+        "hdbscan": algos.hdbscan,
         "meanshift": algos.meanshift,
         "optics": algos.optics,
         "common_nn": algos.common_nn

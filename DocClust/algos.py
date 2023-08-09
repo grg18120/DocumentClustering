@@ -3,7 +3,7 @@ import DocClust.metrics as metrics
 import DocClust.utils as utils
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
-from hdbscan import flat
+from hdbscan import hdbscan_
 from sklearn.cluster import AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
 from sklearn.cluster import Birch
@@ -83,14 +83,14 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
-    # return DBSCAN(
-    #     eps = 0.5, 
-    #     min_samples = config.nn,
-    #     algorithm = algorithm, 
-    #     leaf_size = 30,
-    #     metric = 'euclidean',
-    #     n_jobs = n_jobs
-    # ).fit(Xnormed).labels_
+    return DBSCAN(
+        eps = 0.87, 
+        min_samples = 100,
+        algorithm = algorithm, 
+        leaf_size = 30,
+        metric = 'euclidean',
+        n_jobs = n_jobs
+    ).fit(Xnormed).labels_
 
     def dbs(ee):
         return DBSCAN(
@@ -102,39 +102,34 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
             n_jobs = n_jobs
         ).fit(Xnormed).labels_
 
-    utils.parameter_tuning(dbs, algo_string, labels_true, [0.815, 0.820], 0.005)
-    
-    # step = 0.01
-    # eps_values = np.arange(0.84, 0.90, step).tolist()
-    # csv_rows = []
-    # for i in range(len(eps_values)):
-    #     e = eps_values[i]
-    #     labels_pred = dbs(e)
-        
-    #     print(f" -- eps:{e} -- ")
-
-    #     csv_row = [e]
-    #     for evaluation_metric_string in config.evaluation_metrics_strings:
-    #         score  = utils.wrapper_args(config.evaluation_metrics_pointers().get(evaluation_metric_string),[list(labels_true), list(labels_pred)])
-    #         csv_row.append(round(score, 4))
-    #         print(f"{evaluation_metric_string} = {score}")
-    #     csv_rows.append(csv_row)
-    #     print("\n\n")
-
-    
-    # parameters_csv("EPS",csv_rows,"".join(["dbscan", str(config.nn)]))
+    utils.parameter_tuning(dbs, algo_string, labels_true, [0.77, 0.911], 0.01)
 
     max_eps = 1 
     return dbs(max_eps)
 
 
-def hdbscan(X, labels_true, n_clusters):
+def hdbscan(X, labels_true, n_clusters, cluster_selection_method):
     algo_string = "hdbscan"
 
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
-    return flat.HDBSCAN_flat(X, n_clusters)
+
+
+    # return hdbscan_.HDBSCAN(
+    #     cluster_selection_method = cluster_selection_method
+    # ).fit(Xnormed).labels_
+
+    def hdb(min_sampless):
+        return hdbscan_.HDBSCAN(
+            min_samples = min_sampless,
+            cluster_selection_epsilon = 0.75
+        ).fit(Xnormed).labels_
+
+    utils.parameter_tuning(hdb, algo_string, labels_true, [2, 10, 25, 50, 75, 100, 150, 200], 0)
+
+
+    return hdb(10)
 
 
 def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
@@ -144,11 +139,11 @@ def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
-    # return MeanShift(
-    #     #bandwidth = bb,
-    #     bin_seeding = bin_seeding,
-    #     n_jobs = n_jobs 
-    # ).fit(Xnormed).labels_
+    return MeanShift(
+        bandwidth = 0.75,
+        bin_seeding = bin_seeding,
+        n_jobs = n_jobs 
+    ).fit(Xnormed).labels_
 
 
     def ms(bb):
@@ -160,55 +155,6 @@ def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
 
     utils.parameter_tuning(ms, algo_string, labels_true, [0.1, 1.0], 0.05)
 
-    
-    # step = 0.05
-    # b_values = np.arange(0.8, 1.2, step).tolist()
-    # b_new_values = []
-    # evaluation_metrics = []
-    
-    
-    # for i in range(len(b_values)):
-    #     b = b_values[i]
-    #     labels_pred = ms(b)
-        
-    #     metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #     b_new_values.append(b)
-    #     print(f"bandwidth:{b}  metric:{metrics_value}")
-    #     #print(f"labels_pred:{labels_true}")
-    #     #print(f"labels_pred:{labels_pred}\n")
-
-    #     tmp = [x for x in evaluation_metrics]
-    #     if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
-    #         evaluation_metrics.append(metrics_value)
-
-    #         bb = b - step/2.0
-    #         if bb not in b_new_values:
-    #             labels_pred = ms(bb)
-    #             metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #             b_new_values.append(bb)
-    #             evaluation_metrics.append(metrics_value)
-    #             print(f"bandwidth:{bb}  metric:{metrics_value}")
-    #             #print(f"labels_pred:{labels_true}")
-    #             #print(f"labels_pred:{labels_pred}\n")
-            
-    #         bb = b + step/2.0
-    #         if bb not in b_new_values:
-    #             labels_pred = ms(bb)
-    #             metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #             b_new_values.append(bb)
-    #             evaluation_metrics.append(metrics_value)
-    #             print(f"bandwidth:{bb}  metric:{metrics_value} ")
-    #             #print(f"labels_pred:{labels_true}")
-    #             #print(f"labels_pred:{labels_pred}\n")
-    #     else:
-    #         evaluation_metrics.append(metrics_value)
-
-    # print("\nBest Value")
-    # max_eval_metric = max(evaluation_metrics)
-    # max_index = evaluation_metrics.index(max_eval_metric)
-    # max_b = b_new_values[max_index]
-    # print(f"bandwidth:{max_b} metric:{max_eval_metric}    ")
-
     max_b = 0.5
     return ms(max_b)
 
@@ -219,20 +165,20 @@ def optics(X, labels_true, n_clusters, cluster_method, algorithm, n_jobs):
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
-    # return OPTICS(
-    #     min_samples = config.nn,  
-    #     #metric = 'euclidean', 
-    #     p = 2, 
-    #     cluster_method = cluster_method, 
-    #     algorithm = algorithm, 
-    #     leaf_size = 30,
-    #     n_jobs = n_jobs
-    # ).fit(Xnormed).labels_
+    return OPTICS(
+        min_samples = 3,  
+        #metric = 'euclidean', 
+        p = 2, 
+        cluster_method = cluster_method, 
+        algorithm = algorithm, 
+        leaf_size = 30,
+        n_jobs = n_jobs
+    ).fit(Xnormed).labels_
 
-    def optc(e):
+    def optc(eee):
         return OPTICS(
             min_samples = config.nn,  
-            eps = e,
+            eps = eee,
             #metric = 'euclidean', 
             p = 2, 
             cluster_method = cluster_method, 
@@ -241,56 +187,8 @@ def optics(X, labels_true, n_clusters, cluster_method, algorithm, n_jobs):
             n_jobs = n_jobs
         ).fit(Xnormed).labels_
     
-    utils.parameter_tuning(optc, algo_string, labels_true, [10.0, 720.0], 100)
-    
-    # step = 100
-    # nn_values = np.arange(900, 1000, step).tolist()
-    # nn_new_values = []
-    # evaluation_metrics = []
-
-    # for i in range(len(nn_values)):
-    #     nn = nn_values[i]
-    #     labels_pred = optc(int(nn))
-        
-    #     metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #     nn_new_values.append(nn)
-    #     print(f"nn:{nn}  metric:{metrics_value}")
-    #     #print(f"labels_pred:{labels_true}")
-    #     #print(f"labels_pred:{labels_pred}\n")
-
-    #     tmp = [x for x in evaluation_metrics if metrics_value - x >= 0.05]
-    #     if (len(tmp) == len(evaluation_metrics) and len(tmp)!=0):
-    #         evaluation_metrics.append(metrics_value)
-
-    #         nn_n = nn - step/2.0
-    #         if nn_n not in nn_new_values:
-    #             labels_pred = optc(int(nn_n))
-    #             metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #             nn_new_values.append(nn_n)
-    #             evaluation_metrics.append(metrics_value)
-    #             print(f"nn:{nn_n}  metric:{metrics_value}")
-    #             #print(f"labels_pred:{labels_true}")
-    #             #print(f"labels_pred:{labels_pred}\n")
-            
-    #         nn_n = nn + step/2.0
-    #         if nn_n not in nn_new_values:
-    #             labels_pred = optc(int(nn_n))
-    #             metrics_value = metrics.v_measure_index(labels_true, labels_pred)
-    #             nn_new_values.append(nn_n)
-    #             evaluation_metrics.append(metrics_value)
-    #             print(f"nn:{nn_n}  metric:{metrics_value} ")
-    #             #print(f"labels_pred:{labels_true}")
-    #             #print(f"labels_pred:{labels_pred}\n")
-    #     else:
-    #         evaluation_metrics.append(metrics_value)
-
-    # print("\nBest Value")
-    # max_eval_metric = max(evaluation_metrics)
-    # max_index = evaluation_metrics.index(max_eval_metric)
-    # max_nn = nn_new_values[max_index]
-    # print(f"nn:{max_nn} metric:{max_eval_metric}    ")
-
-  
+    utils.parameter_tuning(optc, algo_string, labels_true, [0.1, 1.1], 0.1)
+      
     return optc(5)
     
 
@@ -302,15 +200,15 @@ def common_nn(X, labels_true, n_clusters, algorithm, n_jobs):
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
-    # return CommonNNClustering(
-	# 	eps = 0.5, 
-	# 	min_samples = 5, 
-	# 	metric = 'euclidean', 
-	# 	algorithm = algorithm,
-	# 	leaf_size = 30, 
-	# 	p = 1,
-    #     n_jobs = n_jobs
-	# ).fit(Xnormed).labels_
+    return CommonNNClustering(
+		eps = 0.79, 
+		min_samples = 2, 
+		metric = 'euclidean', 
+		algorithm = algorithm,
+		leaf_size = 30, 
+		p = 1,
+        n_jobs = n_jobs
+	).fit(Xnormed).labels_
 
     # Parameters Tuning 
     def cnn(ee):
@@ -323,25 +221,6 @@ def common_nn(X, labels_true, n_clusters, algorithm, n_jobs):
             p = 2,
             n_jobs = n_jobs
         ).fit(Xnormed).labels_
-
-    
-    # step = 0.01
-    # eps_values = np.arange(0.75, 1.00, step).tolist()
-    # csv_rows = []
-    # for i in range(len(eps_values)):
-    #     e = eps_values[i]
-    #     labels_pred = cnn(e)
-        
-    #     print(f" -- eps:{e} -- ")
-
-    #     csv_row = [e]
-    #     for evaluation_metric_string in config.evaluation_metrics_strings:
-    #         score  = utils.wrapper_args(config.evaluation_metrics_pointers().get(evaluation_metric_string),[list(labels_true), list(labels_pred)])
-    #         csv_row.append(round(score, 4))
-    #         print(f"{evaluation_metric_string} = {score}")
-    #     csv_rows.append(csv_row)
-    #     print("\n\n")
-
     
     utils.parameter_tuning(cnn, algo_string, labels_true, [0.91, 1.1], 0.01)
 
