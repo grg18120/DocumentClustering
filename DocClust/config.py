@@ -10,7 +10,7 @@ figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentC
 parameters_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
 reduce_dim = False
-nn = 200
+nn = 28
 min_cluster_size = 20
 n_jobs = None
 test_dataset = False
@@ -19,9 +19,9 @@ limit_corpus_size = 0
 # ------------------------ Datasets - Corpus ------------------------ #
 
 datasets_strings = [
-    #"20newsgroups"
+    "20newsgroups"
     #"test"
-    "blobs"
+    #"blobs"
 ]
 
 def datasets_pointers():
@@ -53,11 +53,10 @@ clustering_algorithms_strings = [
      #"kmedoids",
      #"agglomerative",
      #"birch",
-     #"dbscan",
-     "hdbscan",
+     "dbscan",
+     #"hdbscan",
      #"meanshift",
      #"optics",
-     #"meanshift",
      #"common_nn"
 ]
 
@@ -113,7 +112,7 @@ def clustering_algorithms_arguments(n_clusters):
         ],
         "dbscan":[
             [n_clusters, 'kd_tree', n_jobs],
-            [n_clusters, 'ball_tree', n_jobs]
+            #[n_clusters, 'ball_tree', n_jobs]
         ],
         "hdbscan":[
             [n_clusters, 'eom'],
@@ -121,7 +120,7 @@ def clustering_algorithms_arguments(n_clusters):
         ],
         "meanshift": [
             [n_clusters, False, n_jobs],
-            # [n_clusters, True, n_jobs]
+            #[n_clusters, True, n_jobs]
         ],
         "optics":[
             [n_clusters, 'xi', 'kd_tree', n_jobs],

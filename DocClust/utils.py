@@ -13,6 +13,9 @@ import DocClust.config as config
 from tqdm import tqdm 
 import umap
 from sklearn.datasets import make_blobs
+from sklearn.neighbors import NearestNeighbors
+from kneed import KneeLocator
+from matplotlib import pyplot as plt
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -143,6 +146,8 @@ def reduce_dim_umap(vectors):
     return reducer.fit_transform(vectors)
 
 
+# ------------------------ PARAMETER TUNING ------------------------ #
+
 def parameter_tuning(algo_func, algo_string, labels_true, parameter_range, step):
     if (step == 0):
         parameter_values = parameter_range
@@ -176,6 +181,58 @@ def parameters_tuning_csv(parameter_name, data, csv_name):
         # Write the data to the CSV file
         for row in data:
             writer.writerow(row)
+
+
+def knee_points(X, nn, draw_images):
+
+    nearest_neighbors = NearestNeighbors(n_neighbors = nn)
+    neighbors = nearest_neighbors.fit(X)
+    distances, indices = neighbors.kneighbors(X)
+    distances = np.sort(distances[:, nn - 1], axis = 0)
+
+    i = np.arange(len(distances))
+    knee_incr_convex = KneeLocator(i, distances, S = 1, curve = 'convex', direction = 'increasing', interp_method = 'polynomial')
+    knee_decr_convex = KneeLocator(i, distances, S = 1, curve = 'convex', direction = 'decreasing', interp_method = 'polynomial')
+    knee_incr_concave = KneeLocator(i, distances, S = 1, curve = 'concave', direction = 'increasing', interp_method = 'polynomial')
+    knee_decr_concave = KneeLocator(i, distances, S = 1, curve = 'concave', direction = 'decreasing', interp_method = 'polynomial')
+
+    if (draw_images):
+        fig = plt.figure(figsize=(5, 5))
+        plt.plot(distances)
+        plt.xlabel("Points")
+        plt.ylabel("Distance")
+        plt.savefig("Distance_curve.png", dpi = 300)
+
+        fig = plt.figure(figsize=(5, 5))
+        knee_incr_convex.plot_knee()
+        plt.xlabel("Points")
+        plt.ylabel("Distance")
+        plt.savefig("Distance_knee_incr_convex.png", dpi=300)
+
+        fig = plt.figure(figsize=(5, 5))
+        knee_decr_convex.plot_knee()
+        plt.xlabel("Points")
+        plt.ylabel("Distance")
+        plt.savefig("Distance_knee_decr_convex.png", dpi=300)
+
+        fig = plt.figure(figsize=(5, 5))
+        knee_incr_concave.plot_knee()
+        plt.xlabel("Points")
+        plt.ylabel("Distance")
+        plt.savefig("Distance_knee_incr_concave.png", dpi=300)
+
+        fig = plt.figure(figsize=(5, 5))
+        knee_decr_concave.plot_knee()
+        plt.xlabel("Points")
+        plt.ylabel("Distance")
+        plt.savefig("Distance_decr_concave.png", dpi=300)
+
+    return (
+        distances[knee_incr_convex.knee], 
+        distances[knee_decr_convex.knee],
+        distances[knee_incr_concave.knee],
+        distances[knee_decr_concave.knee]
+    )
 
 
 # ------------------------ ENGLISH DATASETS ------------------------ #

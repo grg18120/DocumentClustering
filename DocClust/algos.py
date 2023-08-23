@@ -16,6 +16,8 @@ from matplotlib import pyplot as plt
 import time
 import csv
 import numpy as np
+from sklearn.metrics import silhouette_score
+from collections import Counter
 
 random_state = 42
 
@@ -83,9 +85,52 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
+    
+    # # dist_knee_incr_convex, dist_knee_decr_convex, dist_knee_incr_concave, dist_knee_decr_concave = utils.knee_points(Xnormed, 11, True)
+    
+    # dist_knee_decr_convex = 0.261
+    # dist_knee_decr_concave = 1.263
+
+    # min_samples = np.arange(2,51,3)
+    # eps = np.arange(dist_knee_decr_convex, dist_knee_decr_concave, 0.01) 
+
+    # output = []
+    # output20 = []
+    # for ms in min_samples:
+    #     for ep in eps:
+    #         pred_labels = DBSCAN(min_samples=ms, eps = ep).fit(Xnormed).labels_
+    #         pred_labels_list = list(pred_labels)
+    #         dist_pred_clusters = len({x for x in pred_labels_list})
+    #         # if (dist_pred_clusters > 1):
+    #         #     score = silhouette_score(Xnormed, pred_labels)
+    #         #     output.append((ms, ep, score))
+    #         if (dist_pred_clusters == 20):
+    #             score20 = silhouette_score(Xnormed, pred_labels)
+    #             output20.append((ms, ep, score20))
+
+    # print("\n\n---------------------------- 20 ----------------------------")
+    # twenty_min_samples, twenty_eps, twenty_score = sorted(output20, key=lambda x:x[-1])[-1]
+    # print(f"Best silhouette_score: {twenty_score}")
+    # print(f"min_samples: {twenty_min_samples}")
+    # print(f"eps: {twenty_eps}")
+    # print("---------------------------- 20 ----------------------------\n\n")
+
+    # best_min_samples, best_eps, best_score = sorted(output, key=lambda x:x[-1])[-1]
+    # print(f"Best silhouette_score: {best_score}")
+    # print(f"min_samples: {best_min_samples}")
+    # print(f"eps: {best_eps}")
+
+    # best_pred_labels = DBSCAN(min_samples=best_min_samples, eps = best_eps).fit(Xnormed).labels_
+    # best_dist_clusters = len(Counter(best_pred_labels))
+    # print(f"Number of clusters: {best_dist_clusters}")
+    # print(f"Number of outliers: {Counter(best_pred_labels)[-1]}")
+    # print(f"Silhouette_score: {silhouette_score(Xnormed, best_pred_labels)}")
+    
     return DBSCAN(
-        eps = 0.87, 
-        min_samples = 100,
+        eps = 0.901,
+        min_samples = 5,
+        #eps = 0.87, 
+        #min_samples = 100,
         algorithm = algorithm, 
         leaf_size = 30,
         metric = 'euclidean',
@@ -111,31 +156,32 @@ def dbscan(X, labels_true, n_clusters, algorithm, n_jobs):
 def hdbscan(X, labels_true, n_clusters, cluster_selection_method):
     algo_string = "hdbscan"
 
+    # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
+    return hdbscan_.HDBSCAN(
+        min_samples = 25,
+        cluster_selection_epsilon = 0.805,
+        cluster_selection_method = cluster_selection_method
+    ).fit(Xnormed).labels_
 
-
-    # return hdbscan_.HDBSCAN(
-    #     cluster_selection_method = cluster_selection_method
-    # ).fit(Xnormed).labels_
-
-    def hdb(min_sampless):
+    def hdb(ee):
         return hdbscan_.HDBSCAN(
-            min_samples = min_sampless,
-            cluster_selection_epsilon = 0.75
+            min_samples = 25,
+            cluster_selection_epsilon = ee
         ).fit(Xnormed).labels_
 
-    utils.parameter_tuning(hdb, algo_string, labels_true, [2, 10, 25, 50, 75, 100, 150, 200], 0)
+    utils.parameter_tuning(hdb, algo_string, labels_true, [0.7, 0.902], 0.005)
 
 
     return hdb(10)
 
 
 def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
-    print("-------------------------------------\n")
     algo_string = "meanshift"
 
+    # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
@@ -161,12 +207,13 @@ def meanshift(X, labels_true, n_clusters, bin_seeding, n_jobs):
 
 def optics(X, labels_true, n_clusters, cluster_method, algorithm, n_jobs):
     algo_string = "optics"
-    print("-------------------------------------\n")
+    
+    # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
     return OPTICS(
-        min_samples = 3,  
+        #min_samples = 3,  
         #metric = 'euclidean', 
         p = 2, 
         cluster_method = cluster_method, 
@@ -197,6 +244,7 @@ def optics(X, labels_true, n_clusters, cluster_method, algorithm, n_jobs):
 def common_nn(X, labels_true, n_clusters, algorithm, n_jobs):
     algo_string = "common_nn"
 
+    # Normalize vectors X
     Xnorm = np.linalg.norm(X.astype(float), axis = 1)
     Xnormed = np.divide(X, Xnorm.reshape(Xnorm.shape[0], 1))
 
