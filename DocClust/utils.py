@@ -27,8 +27,9 @@ def load_models(vectorizers_strings):
     spacy_model_en = None
     spacy_model_gr = None
     sent_transformers_model = None
+    jina_model = None
 
-    if "spacy_model_embeddings" or "sent_transformers_model_embeddings" in vectorizers_strings:
+    if "spacy_model_embeddings" or "sent_transformers_model_embeddings" or "jina_model_embeddings"  in vectorizers_strings:
         spacy_model_en = spacy.load('en_core_web_lg')
         spacy_model_gr = spacy.load('el_core_news_lg')
         if "sent_transformers_model_embeddings" in vectorizers_strings:
@@ -36,8 +37,13 @@ def load_models(vectorizers_strings):
                 model_name_or_path = 'sentence-transformers/all-mpnet-base-v2',
                 device = 'cpu'
             )
-
-    return [spacy_model_en, spacy_model_gr, sent_transformers_model]
+        if "jina_model_embeddings" in vectorizers_strings:
+            jina_model = SentenceTransformer(
+                model_name_or_path = 'jinaai/jina-embedding-l-en-v1',
+                device = 'cpu'
+            )
+        
+    return [spacy_model_en, spacy_model_gr, sent_transformers_model, jina_model]
 
 
 def spacy_useful_token(token):
@@ -81,7 +87,7 @@ def sent_transformers_model_embeddings(corpus, spacy_model, sent_transorfmers_mo
         doc = spacy_model(text)
         sents_spacy_span = [sent for sent in doc.sents]
 
-        # Cut sentence in the miidle if len(tokens of sentence) < transf_model.max_seq_length
+        # Cut sentence in the middle if len(tokens of sentence) < transf_model.max_seq_length
         sents_spacy_str = []
         for sent in sents_spacy_span:
             if len([token for token in sent]) > sent_transorfmers_model.max_seq_length :
@@ -102,6 +108,19 @@ def sent_transformers_model_embeddings(corpus, spacy_model, sent_transorfmers_mo
 
     return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
 
+
+def jina_model_embeddings(corpus, jina_model, labels_true):
+    doc_vectors = []
+    doc_indx = []
+    for index, text in enumerate(tqdm(corpus)):
+        doc_vector = jina_model.encode(text)
+
+        # remove nan value & zero elements vectors
+        if np.any(doc_vector) and isinstance(doc_vector,np.ndarray):
+            doc_vectors.append(doc_vector)
+            doc_indx.append(index)
+
+    return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
 
 def tfidf(corpus, labels_true):
     vectorizer = TfidfVectorizer(

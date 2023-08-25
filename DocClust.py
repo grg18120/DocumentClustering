@@ -12,7 +12,7 @@ import os
 experiments.create_serialized_vectors_dirs()
 
 # Load Models to create embeddings
-[spacy_model_en, spacy_model_gr, sent_transformers_model] = utils.load_models(config.vectorizers_strings)
+[spacy_model_en, spacy_model_gr, sent_transformers_model, jina_model] = utils.load_models(config.vectorizers_strings)
 
 # Main Loops
 for dataset_string in config.datasets_strings:
@@ -55,8 +55,15 @@ for dataset_string in config.datasets_strings:
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transformers_model]+ [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transformers_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+        if (vectorizer_string == "jina_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [jina_model] + [labels_true_corpus])
+                experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+
 
         print("\n\n*******************************************************************")
         print("*******************************************************************")

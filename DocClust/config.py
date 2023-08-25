@@ -35,13 +35,15 @@ def datasets_pointers():
 vectorizers_strings = [
     #"tfidf",
     #"spacy_model_embeddings",
-    "sent_transformers_model_embeddings"
+    #sent_transformers_model_embeddings"
+    "jina_model_embeddings"
     
 ]
 
 def vectorizers_pointers():
     return {
         "sent_transformers_model_embeddings": utils.sent_transformers_model_embeddings,
+        "jina_model_embeddings": utils.jina_model_embeddings,
         "spacy_model_embeddings": utils.spacy_model_embeddings,
         "tfidf": utils.tfidf
     }
@@ -49,15 +51,11 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     #"kmeans",
-     #"kmedoids",
-     #"agglomerative",
-     #"birch",
-     "dbscan",
-     #"hdbscan",
-     #"meanshift",
-     #"optics",
-     #"common_nn"
+     "kmeans",
+     "kmedoids",
+     "agglomerative",
+     "birch",
+    # "hdbscan"
 ]
 
 # Config Clustering algorithm approaches
@@ -71,16 +69,8 @@ def clustering_algorithms_parameteres():
             ['n_clusters', 'compute_full_tree', 'linkage', 'metric'],
         "birch":
             ['n_clusters'],
-        "dbscan":
-            ['n_clusters', 'algorithm', 'n_jobs'],
         "hdbscan":
-            ['n_clusters', 'cluster_selection_method'],
-        "meanshift": 
-            ['n_clusters', 'bin_seeding', 'n_jobs'],
-        "optics":
-            ['n_clusters','cluster_method', 'algorithm', 'n_jobs'],
-        "common_nn":
-            ['n_clusters', 'algorithm', 'n_jobs']
+            ['n_clusters', 'cluster_selection_method']
     }
 
 def clustering_algorithms_arguments(n_clusters):
@@ -99,38 +89,16 @@ def clustering_algorithms_arguments(n_clusters):
         ],
         "agglomerative": [
             [n_clusters, True, 'ward', 'euclidean'],
-            [n_clusters, True, 'single', 'cosine'],
-            [n_clusters, True, 'average', 'cosine'],
             [n_clusters, True, 'complete', 'cosine'],
             [n_clusters, False, 'ward', 'euclidean'],
-            [n_clusters, False, 'single', 'cosine'],
-            [n_clusters, False, 'average', 'cosine'],
             [n_clusters, False, 'complete', 'cosine']
         ],
         "birch":[
             [n_clusters]
         ],
-        "dbscan":[
-            [n_clusters, 'kd_tree', n_jobs],
-            #[n_clusters, 'ball_tree', n_jobs]
-        ],
         "hdbscan":[
             [n_clusters, 'eom'],
             [n_clusters, 'leaf']
-        ],
-        "meanshift": [
-            [n_clusters, False, n_jobs],
-            #[n_clusters, True, n_jobs]
-        ],
-        "optics":[
-            [n_clusters, 'xi', 'kd_tree', n_jobs],
-            [n_clusters, 'xi', 'ball_tree', n_jobs],
-            [n_clusters, 'dbscan', 'kd_tree', n_jobs],
-            [n_clusters, 'dbscan', 'kd_tree', n_jobs]
-        ],
-        "common_nn":[
-            [n_clusters, 'kd_tree', n_jobs],
-            [n_clusters, 'ball_tree', n_jobs]
         ]
     }
         
@@ -140,11 +108,7 @@ def clustering_algorithms_pointers():
         "kmedoids": algos.kmedoids,
         "agglomerative": algos.agglomerative,
         "birch": algos.birch,
-        "dbscan": algos.dbscan,
-        "hdbscan": algos.hdbscan,
-        "meanshift": algos.meanshift,
-        "optics": algos.optics,
-        "common_nn": algos.common_nn
+        "hdbscan": algos.hdbscan
     }
 
 
