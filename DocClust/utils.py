@@ -160,9 +160,11 @@ def reduce_dim_umap(vectors):
         n_neighbors = 15,
         n_components = 20, 
         metric = 'cosine',
-        min_dist = 0.1
+        min_dist = 0.1,
+        random_state = config.random_state
     )
-    return reducer.fit_transform(vectors)
+    # return reducer.fit_transform(vectors)
+    return np.array(reducer.fit_transform(vectors), dtype = object)
 
 
 # ------------------------ PARAMETER TUNING ------------------------ #

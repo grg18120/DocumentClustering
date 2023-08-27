@@ -15,6 +15,7 @@ min_cluster_size = 20
 n_jobs = None
 test_dataset = False
 limit_corpus_size = 0
+random_state = 42
 
 # ------------------------ Datasets - Corpus ------------------------ #
 
@@ -33,9 +34,9 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    #"tfidf",
-    #"spacy_model_embeddings",
-    #sent_transformers_model_embeddings"
+    "tfidf",
+    "spacy_model_embeddings",
+    "sent_transformers_model_embeddings",
     "jina_model_embeddings"
     
 ]
@@ -51,11 +52,11 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     "kmeans",
-     "kmedoids",
-     "agglomerative",
-     "birch",
-    # "hdbscan"
+     #"kmeans",
+     #"kmedoids",
+     #"agglomerative",
+     #"birch",
+     "hdbscan"
 ]
 
 # Config Clustering algorithm approaches
@@ -82,10 +83,10 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters, 'lloyd', 'k-means++']
         ],
         "kmedoids":[
-            [n_clusters, 'pam', 'build'],
+            #[n_clusters, 'pam', 'build'],
             [n_clusters, 'pam', 'k-medoids++'],
-            [n_clusters, 'alternate', 'build'],
-            [n_clusters, 'alternate', 'k-medoids++']
+            #[n_clusters, 'alternate', 'build'],
+            #[n_clusters, 'alternate', 'k-medoids++']
         ],
         "agglomerative": [
             [n_clusters, True, 'ward', 'euclidean'],
@@ -97,7 +98,7 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters]
         ],
         "hdbscan":[
-            [n_clusters, 'eom'],
+            #[n_clusters, 'eom'],
             [n_clusters, 'leaf']
         ]
     }
