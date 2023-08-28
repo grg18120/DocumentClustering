@@ -291,6 +291,10 @@ def load_dataset_blobs():
     centers = [[1, 1], [-1, -1], [1, -1]]
     X, labels_true = make_blobs(n_samples = 750, centers = centers, cluster_std = 0.4, random_state = 0)
     return [corpus, labels_true, n_clusters]
+
+
+def load_dataset_reuters21578():
+    pass
  
 '''
 

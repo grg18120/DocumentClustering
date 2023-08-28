@@ -14,6 +14,7 @@ import numpy as np
 from sklearn.metrics import silhouette_score
 from collections import Counter
 from hdbscan import flat
+from hdbscan import HDBSCAN
 
 random_state = 42
 
@@ -82,12 +83,17 @@ def hdbscan(X, labels_true, n_clusters, cluster_selection_method):
 
     clusterer = flat.HDBSCAN_flat(
             X = Xnormed,
+            clusterer = HDBSCAN,
             n_clusters = n_clusters,
-            cluster_selection_method= cluster_selection_method
+            cluster_selection_method = cluster_selection_method
     )
     return clusterer.labels_
 
-    # clusterer = flat.HDBSCAN_flat(Xnormed, n_clusters, prediction_data=True)
+    # clusterer = flat.HDBSCAN_flat(
+    #     Xnormed, 
+    #     n_clusters, 
+    #     prediction_data=True
+    # )
     # pred_labels, proba  = flat.approximate_predict_flat(clusterer, Xnormed, n_clusters)
     # return pred_labels
 

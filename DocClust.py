@@ -79,7 +79,9 @@ for dataset_string in config.datasets_strings:
         # Reduce dimensionality
         if (config.reduce_dim and vectorizer_string == "sent_transformers_model_embeddings"):
             X = utils.reduce_dim_umap(X)
-            print("reduce dimensions UMAP")
+            print("\n\nReduce dimensions UMAP")
+            print(f"X Size = {len(X)}")
+            print(f"X Shape = {X.shape}\n\n")
 
 
         # n_clusters = 3

@@ -9,7 +9,7 @@ csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 parameters_dir = 'C:/Users/George Georgariou/Desktop/'
 debug = False
-reduce_dim = False
+reduce_dim = True
 nn = 28
 min_cluster_size = 20
 n_jobs = None
@@ -34,10 +34,10 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    "tfidf",
-    "spacy_model_embeddings",
+    #"tfidf",
+    #"spacy_model_embeddings",
     "sent_transformers_model_embeddings",
-    "jina_model_embeddings"
+    #"jina_model_embeddings"
     
 ]
 
@@ -52,10 +52,10 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     #"kmeans",
-     #"kmedoids",
-     #"agglomerative",
-     #"birch",
+     "kmeans",
+     "kmedoids",
+     "agglomerative",
+     "birch",
      "hdbscan"
 ]
 
@@ -83,10 +83,10 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters, 'lloyd', 'k-means++']
         ],
         "kmedoids":[
-            #[n_clusters, 'pam', 'build'],
+            [n_clusters, 'pam', 'build'],
             [n_clusters, 'pam', 'k-medoids++'],
-            #[n_clusters, 'alternate', 'build'],
-            #[n_clusters, 'alternate', 'k-medoids++']
+            [n_clusters, 'alternate', 'build'],
+            [n_clusters, 'alternate', 'k-medoids++']
         ],
         "agglomerative": [
             [n_clusters, True, 'ward', 'euclidean'],
