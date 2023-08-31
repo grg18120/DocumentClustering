@@ -32,11 +32,6 @@ for dataset_string in config.datasets_strings:
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ", len(corpus))
 
-    # sss = set(labels_true)
-    # axx = plt.hist(labels_true, density=False, bins=list(sss))   
-    # print(axx)
-    
-
     for vectorizer_string in config.vectorizers_strings:
         startTimeVectorizer = time.time()
         if (vectorizer_string == "tfidf"): 

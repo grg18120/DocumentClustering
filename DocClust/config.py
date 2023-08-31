@@ -20,23 +20,25 @@ random_state = 42
 # ------------------------ Datasets - Corpus ------------------------ #
 
 datasets_strings = [
-    "20newsgroups"
+    #"20newsgroups"
     #"test"
     #"blobs"
+    "reuters21578"
 ]
 
 def datasets_pointers():
     return {
         "20newsgroups": utils.load_dataset_20newsgroups,
+        "reuters21578": utils.load_dataset_reuters21578,
         "test": utils.load_dataset_test,
         "blobs":utils.load_dataset_blobs
     }
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    #"tfidf",
-    #"spacy_model_embeddings",
-    "sent_transformers_model_embeddings",
+    "tfidf",
+    "spacy_model_embeddings",
+    #"sent_transformers_model_embeddings",
     #"jina_model_embeddings"
     
 ]

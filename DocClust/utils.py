@@ -16,6 +16,7 @@ from sklearn.datasets import make_blobs
 from sklearn.neighbors import NearestNeighbors
 from kneed import KneeLocator
 from matplotlib import pyplot as plt
+from datasets import load_dataset
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -294,7 +295,46 @@ def load_dataset_blobs():
 
 
 def load_dataset_reuters21578():
-    pass
+    '''
+    Reuters21578 - Subset:ModAplte - Traing + Test documents
+    Choose documents with only one topic(class)
+    Choose 8 (topics)classes with the most amount of documents 
+    '''
+
+    dataset = load_dataset("rjjan/reuters21578", "ModApte", split = "train+test")
+    dataset_indc_one_topic = []
+    topics_amount_dict = {}
+    for doc_id, document in enumerate(dataset):
+        topics = document["topics"]
+        if (len(topics) == 1):
+            dataset_indc_one_topic.append(doc_id)
+            topic = topics[0]
+            if topic in topics_amount_dict:
+                topics_amount_dict[topic] += 1
+            else:
+                topics_amount_dict.update({topic: 1})
+
+    topics_amount_list = list(topics_amount_dict.items())
+    topics_amount_list_sorted = sorted(topics_amount_list, key = lambda topics_amount_list:topics_amount_list[1], reverse = True)
+    eight_most_freq_classes = [x[0] for x in topics_amount_list_sorted[:8]]
+
+    corpus, labels_true, n_clusters = ([], [], 0)
+    for doc_inx in dataset_indc_one_topic:
+        document = dataset[doc_inx]
+        topic = document["topics"][0]
+        if topic in eight_most_freq_classes:
+            corpus.append(document["text"])
+            # corpus.append(document["text"].replace("\n Reuter\n","").replace("\n", " "))
+            #corpus.append(document["text"].replace("\n Reuter\n",""))
+            labels_true.append(eight_most_freq_classes.index(topic))
+    n_clusters = len(set(labels_true))
+
+
+
+    print("ok")
+
+    return [corpus, labels_true, n_clusters]
+
  
 '''
 
