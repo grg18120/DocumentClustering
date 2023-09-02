@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 import numpy as np
 from DocClust.config import * 
+from scipy.io import arff, loadmat
 # import matplotlib
 # matplotlib.pyplot.ion()
 # from matplotlib import pyplot as plt
@@ -119,4 +120,47 @@ def load_deselialized_vector(dataset_string, vectorizer_string):
 
     arr = arr.reshape(shape)
     return arr, labels_true
-    
+
+
+def load_token_freq_vectors(dataset_string):
+
+    token_freq_vectors, labels_true, vocabulary = ([], [], [])
+    path_to_directory = local_datasets_path + dataset_string + "/"
+    file_arff = dataset_string + ".arff"
+
+    with open(path_to_directory + file_arff , "r") as inFile:
+        dataset_arff = inFile.readlines()
+
+        data_start = False
+        for line in dataset_arff:
+            if not data_start:
+                if "@attribute" in line.lower():
+                    vocab_line = line.split()
+                    vocabulary.append(vocab_line[vocab_line.index("@attribute") +1 ])
+                elif "@data" in line.lower():
+                    print(line)
+                    data_start = True
+            else:
+                line_indc = line.split(",")
+                labels_true.append(line_indc[-1].strip('" \n'))
+                del line_indc[-1]
+                token_freq_vectors.append([int(x) for x in line_indc])
+            
+    n_clusters = len(set(labels_true))
+    print("ok")
+    return [token_freq_vectors, labels_true, n_clusters]
+
+
+def load_local_stored_dataset(dataset_string):
+
+    path_to_directory = local_datasets_path + dataset_string + "/"
+    file_mat = dataset_string + ".mat"
+    # file_mat = "CSTR_coclustFormat" + ".mat"
+    matlab_dict = loadmat(path_to_directory + file_mat)
+    doc_vectors = matlab_dict['fea'].tolist()
+    labels_true = [label[0] for label in matlab_dict['gnd'].tolist()]
+
+    print(len(X))
+    print("--")
+
+    return np.array(doc_vectors, dtype = object), labels_true

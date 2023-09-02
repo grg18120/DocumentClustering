@@ -318,7 +318,7 @@ def load_dataset_reuters21578():
     topics_amount_list_sorted = sorted(topics_amount_list, key = lambda topics_amount_list:topics_amount_list[1], reverse = True)
     eight_most_freq_classes = [x[0] for x in topics_amount_list_sorted[:8]]
 
-    corpus, labels_true, n_clusters = ([], [], 0)
+    corpus, labels_true = ([], [])
     for doc_inx in dataset_indc_one_topic:
         document = dataset[doc_inx]
         topic = document["topics"][0]
@@ -335,16 +335,56 @@ def load_dataset_reuters21578():
 
     return [corpus, labels_true, n_clusters]
 
+
+
+def load_dataset_trec():
+
+    dataset = load_dataset("trec", split = "train+test")
+
+    corpus, labels_true = ([], [])
+
+        
+
+
+    n_clusters = len(set(labels_true))
+
+
+    return [corpus, labels_true, n_clusters]
+
+
+def load_dataset_web_ace():
+
+    corpus, labels_true = ([], [])
+
+        
+
+
+    n_clusters = len(set(labels_true))
+
+
+    return [corpus, labels_true, n_clusters]
  
-'''
+
 
 # ------------------------ GREEK DATASET ------------------------ #
 
-from datasets import load_dataset
+def load_dataset_greek_legal_code():
 
-dataset = load_dataset("greek_legal_code")
+    dataset = load_dataset("greek_legal_code", "chapter", split = "train+test+validation")
 
-'''
+    corpus, labels_true = ([], [])
+
+        
+
+
+    n_clusters = len(set(labels_true))
+
+
+    return [corpus, labels_true, n_clusters]
+
+
+
+
 
 # ------------------------ HELPFUL FUNCS ------------------------ #
 def wrapper(func):

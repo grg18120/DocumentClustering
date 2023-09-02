@@ -8,8 +8,9 @@ import DocClust.utils as utils
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 parameters_dir = 'C:/Users/George Georgariou/Desktop/'
+local_datasets_path = 'D:/Datasets/'
 debug = False
-reduce_dim = True
+reduce_dim = False
 nn = 28
 min_cluster_size = 20
 n_jobs = None
@@ -23,7 +24,7 @@ datasets_strings = [
     #"20newsgroups"
     #"test"
     #"blobs"
-    "reuters21578"
+    #"reuters21578"
 ]
 
 def datasets_pointers():
@@ -38,7 +39,7 @@ def datasets_pointers():
 vectorizers_strings = [
     "tfidf",
     "spacy_model_embeddings",
-    #"sent_transformers_model_embeddings",
+    "sent_transformers_model_embeddings",
     #"jina_model_embeddings"
     
 ]

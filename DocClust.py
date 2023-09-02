@@ -8,6 +8,10 @@ from matplotlib import pyplot as plt
 from sklearn.datasets import make_blobs
 import os
 
+
+# experiments.load_token_freq_vectors("CSTR")
+v, lt = experiments.load_local_stored_dataset("CSTR")
+
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
 
