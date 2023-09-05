@@ -8,7 +8,7 @@ import DocClust.utils as utils
 csv_dir = 'C:/Users/George Georgariou/Desktop/'
 figures_dir = 'C:/Users/George Georgariou/Documents/Visual Studio Code/DocumentClustering/figures/'
 parameters_dir = 'C:/Users/George Georgariou/Desktop/'
-local_datasets_path = 'D:/Datasets/'
+local_datasets_path = 'D:\\Datasets\\'
 debug = False
 reduce_dim = False
 nn = 28
@@ -25,12 +25,18 @@ datasets_strings = [
     #"test"
     #"blobs"
     #"reuters21578"
+    "trec",
+    #"webace"
+    #"greek_legal_code"
 ]
 
 def datasets_pointers():
     return {
         "20newsgroups": utils.load_dataset_20newsgroups,
         "reuters21578": utils.load_dataset_reuters21578,
+        "trec": utils.load_dataset_trec,
+        "webace": utils.load_dataset_webace,
+        "greek_legal_code":utils.load_dataset_greek_legal_code,
         "test": utils.load_dataset_test,
         "blobs":utils.load_dataset_blobs
     }
@@ -40,7 +46,7 @@ vectorizers_strings = [
     "tfidf",
     "spacy_model_embeddings",
     "sent_transformers_model_embeddings",
-    #"jina_model_embeddings"
+    "jina_model_embeddings"
     
 ]
 

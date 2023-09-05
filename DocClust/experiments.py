@@ -122,7 +122,7 @@ def load_deselialized_vector(dataset_string, vectorizer_string):
     return arr, labels_true
 
 
-def load_token_freq_vectors(dataset_string):
+def load_dataset_arff(dataset_string):
 
     token_freq_vectors, labels_true, vocabulary = ([], [], [])
     path_to_directory = local_datasets_path + dataset_string + "/"
@@ -151,7 +151,7 @@ def load_token_freq_vectors(dataset_string):
     return [token_freq_vectors, labels_true, n_clusters]
 
 
-def load_local_stored_dataset(dataset_string):
+def load_dataset_mat(dataset_string):
 
     path_to_directory = local_datasets_path + dataset_string + "/"
     file_mat = dataset_string + ".mat"
@@ -160,7 +160,6 @@ def load_local_stored_dataset(dataset_string):
     doc_vectors = matlab_dict['fea'].tolist()
     labels_true = [label[0] for label in matlab_dict['gnd'].tolist()]
 
-    print(len(X))
     print("--")
 
     return np.array(doc_vectors, dtype = object), labels_true

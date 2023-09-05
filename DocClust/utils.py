@@ -17,6 +17,7 @@ from sklearn.neighbors import NearestNeighbors
 from kneed import KneeLocator
 from matplotlib import pyplot as plt
 from datasets import load_dataset
+import os
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -324,63 +325,45 @@ def load_dataset_reuters21578():
         topic = document["topics"][0]
         if topic in eight_most_freq_classes:
             corpus.append(document["text"])
-            # corpus.append(document["text"].replace("\n Reuter\n","").replace("\n", " "))
-            #corpus.append(document["text"].replace("\n Reuter\n",""))
             labels_true.append(eight_most_freq_classes.index(topic))
     n_clusters = len(set(labels_true))
 
-
-
-    print("ok")
+    # corpus2, labels_true2 = zip(*[(dataset[doc_indx]["text"], eight_most_freq_classes.index(dataset[doc_indx]["topics"][0])) for doc_indx in dataset_indc_one_topic if dataset[doc_inx]["topics"][0] in eight_most_freq_classes])
 
     return [corpus, labels_true, n_clusters]
 
 
 
 def load_dataset_trec():
-
     dataset = load_dataset("trec", split = "train+test")
-
-    corpus, labels_true = ([], [])
-
-        
-
-
+    corpus, labels_true  = zip(*[(x["text"], x["coarse_label"]) for x in  dataset])
     n_clusters = len(set(labels_true))
 
-
-    return [corpus, labels_true, n_clusters]
-
-
-def load_dataset_web_ace():
-
-    corpus, labels_true = ([], [])
-
-        
+    return [list(corpus), list(labels_true), n_clusters]
 
 
-    n_clusters = len(set(labels_true))
+def load_dataset_webace():
+    webace_path = "".join([config.local_datasets_path, "WebAce\\WebAce\\"])
+    webace_files = os.listdir(webace_path)
+    corpus, labels_true_str =  zip(*[(open(webace_path + x, 'r').read(), x.split(".")[0]) for x in webace_files])
 
+    labels_distnct_values = set(labels_true_str)
+    labels_true = [list(labels_distnct_values).index(x) for x in labels_true_str]
+    n_clusters = len(set(labels_distnct_values))
 
-    return [corpus, labels_true, n_clusters]
+    return [list(corpus), labels_true, n_clusters]
  
 
 
 # ------------------------ GREEK DATASET ------------------------ #
 
 def load_dataset_greek_legal_code():
-
-    dataset = load_dataset("greek_legal_code", "chapter", split = "train+test+validation")
-
-    corpus, labels_true = ([], [])
-
-        
-
-
+    dataset = load_dataset("greek_legal_code", "volume", split = "train+test+validation")
+    corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
     n_clusters = len(set(labels_true))
 
+    return [list(corpus), list(labels_true), n_clusters]
 
-    return [corpus, labels_true, n_clusters]
 
 
 

@@ -10,7 +10,7 @@ import os
 
 
 # experiments.load_token_freq_vectors("CSTR")
-v, lt = experiments.load_local_stored_dataset("CSTR")
+corp, lt, ncl = utils.load_dataset_trec()
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
@@ -22,6 +22,12 @@ experiments.create_serialized_vectors_dirs()
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
    
+    # Choose proper Spacy Model
+    if dataset_string != "greek_legal_code":
+        spacy_model = spacy_model_en
+    else:
+        spacy_model = spacy_model_gr
+
     # Limit size of corpus
     if (config.limit_corpus_size > 1):
         corpus_size = len(corpus)
