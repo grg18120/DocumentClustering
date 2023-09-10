@@ -9,8 +9,8 @@ from sklearn.datasets import make_blobs
 import os
 
 
-# experiments.load_token_freq_vectors("CSTR")
-corp, lt, ncl = utils.load_dataset_trec()
+
+#corp, lt_str, lt, ncl = utils.load_dataset_classic4()
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
@@ -21,7 +21,8 @@ experiments.create_serialized_vectors_dirs()
 # Main Loops
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
-   
+    # experiments.plot_histogram(labels_true)
+
     # Choose proper Spacy Model
     if dataset_string != "greek_legal_code":
         spacy_model = spacy_model_en
@@ -39,6 +40,7 @@ for dataset_string in config.datasets_strings:
 
     print("Corpus Size before clean: ", len(corpus))
     corpus, labels_true = utils.clean_corpus(corpus, labels_true)
+    experiments.plot_histogram(labels_true, n_clusters)
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ", len(corpus))
 

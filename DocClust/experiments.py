@@ -8,7 +8,7 @@ from DocClust.config import *
 from scipy.io import arff, loadmat
 # import matplotlib
 # matplotlib.pyplot.ion()
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 
 def save_csv(dataset_name, vectorizer, n_clusters, all_eval_metric_values):
@@ -55,6 +55,11 @@ def clust_algo_to_csv(clustering_algorithms_string, parameters, arguments):
         lambda x,y: f"{x}|{y}", [f"{clustering_algorithms_string}"] + [f"{a}:{b}" for a, b in zip(parameters, map(str, arguments))]   
     )
 
+def plot_histogram(x, binss):
+    plt.hist(x, density=False, bins = int(2*binss))  # density=False would make counts
+    plt.ylabel('Count')
+    plt.xlabel('values')
+    plt.show()
 
 def create_serialized_vectors_dirs():
     """

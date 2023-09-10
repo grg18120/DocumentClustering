@@ -336,7 +336,8 @@ def load_dataset_reuters21578():
 
 def load_dataset_trec():
     dataset = load_dataset("trec", split = "train+test")
-    corpus, labels_true  = zip(*[(x["text"], x["coarse_label"]) for x in  dataset])
+    # Load datraset except documents from class = 0 (very few)
+    corpus, labels_true  = zip(*[(x["text"], x["coarse_label"]) for x in  dataset if x["coarse_label"] != 0])
     n_clusters = len(set(labels_true))
 
     return [list(corpus), list(labels_true), n_clusters]
@@ -353,6 +354,27 @@ def load_dataset_webace():
 
     return [list(corpus), labels_true, n_clusters]
  
+
+def load_dataset_pubmed4000():
+    pubmed4000_path = "".join([config.local_datasets_path, "pubmed4000\\pubmed4000\\"])
+    pubmed4000_files = os.listdir(pubmed4000_path)
+    #corpus = [open(pubmed4000_path + file_name, 'r').read() for file_name in pubmed4000_files]
+    #labels_true_str = ["".join([char for char in file_name if not char.isdigit()]).split(".")[0] for file_name in pubmed4000_files]
+
+    corpus, labels_true_str = zip(*[(open(pubmed4000_path + file_name, 'r').read(), "".join([char for char in file_name if not char.isdigit()]).split(".")[0] ) for file_name in pubmed4000_files])
+    labels_true, n_clusters = labels_str_to_int(labels_true_str)
+
+    return [list(corpus), labels_true, n_clusters]
+
+
+def load_dataset_classic4():
+    classic4_path = "".join([config.local_datasets_path, "classic4\\classic4_more_than_500_bytes\\"])
+    classic4_files = os.listdir(classic4_path)
+    corpus = [open(classic4_path + file_name, 'r').read() for file_name in classic4_files]
+    labels_true_str = ["".join([char for char in file_name if not char.isdigit()]).split(".")[0] for file_name in classic4_files]
+
+    labels_true, n_clusters = labels_str_to_int(labels_true_str)
+    return [corpus, labels_true, n_clusters]
 
 
 # ------------------------ GREEK DATASET ------------------------ #
@@ -404,7 +426,7 @@ def clean_corpus(corpus, labels_true):
      Remove empty documents
     """
     docs, doc_indx = zip(*[(' '.join(text.split()), index) for index, text in enumerate(corpus) if len(" ".join(text.split())) > 0])
-    return docs, [labels_true[x] for x in doc_indx]
+    return list(docs), [labels_true[x] for x in doc_indx]
 
 
 def accepted_vector(vector, vector_type):
@@ -413,3 +435,8 @@ def accepted_vector(vector, vector_type):
     Check proper object type
     """
     return np.any(vector) and isinstance(vector,vector_type)
+
+
+def labels_str_to_int(labels_str):
+    unique_labels_vals = set(labels_str)
+    return [ list(unique_labels_vals).index(lab_str) for lab_str in labels_str], len(unique_labels_vals)

@@ -24,9 +24,11 @@ datasets_strings = [
     #"20newsgroups"
     #"test"
     #"blobs"
-    #"reuters21578"
-    "trec",
+    "reuters21578",
+    #"trec",
     #"webace"
+    "pubmed4000",
+    "classic4"
     #"greek_legal_code"
 ]
 
@@ -35,6 +37,8 @@ def datasets_pointers():
         "20newsgroups": utils.load_dataset_20newsgroups,
         "reuters21578": utils.load_dataset_reuters21578,
         "trec": utils.load_dataset_trec,
+        "classic4": utils.load_dataset_classic4,
+        "pubmed4000":utils.load_dataset_pubmed4000,
         "webace": utils.load_dataset_webace,
         "greek_legal_code":utils.load_dataset_greek_legal_code,
         "test": utils.load_dataset_test,
@@ -43,11 +47,10 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    "tfidf",
-    "spacy_model_embeddings",
+    #"tfidf",
+    #"spacy_model_embeddings",
     "sent_transformers_model_embeddings",
-    "jina_model_embeddings"
-    
+    #"jina_model_embeddings"   
 ]
 
 def vectorizers_pointers():
@@ -61,10 +64,10 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     "kmeans",
-     "kmedoids",
-     "agglomerative",
-     "birch",
+     #"kmeans",
+     #"kmedoids",
+     #"agglomerative",
+     #"birch",
      "hdbscan"
 ]
 
@@ -107,7 +110,7 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters]
         ],
         "hdbscan":[
-            #[n_clusters, 'eom'],
+            [n_clusters, 'eom'],
             [n_clusters, 'leaf']
         ]
     }
