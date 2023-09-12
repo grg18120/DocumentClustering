@@ -20,16 +20,22 @@ random_state = 42
 
 # ------------------------ Datasets - Corpus ------------------------ #
 
+datasets_language = "greek"
+
 datasets_strings = [
     #"20newsgroups"
     #"test"
     #"blobs"
-    "reuters21578",
+    #"reuters21578",
     #"trec",
     #"webace"
-    "pubmed4000",
-    "classic4"
-    #"greek_legal_code"
+    #"pubmed4000",
+    #"classic4"
+    # "greek_legal_code"
+    "makedonia",
+    "greeksum",
+    "greek_legal_code"
+
 ]
 
 def datasets_pointers():
@@ -40,15 +46,17 @@ def datasets_pointers():
         "classic4": utils.load_dataset_classic4,
         "pubmed4000":utils.load_dataset_pubmed4000,
         "webace": utils.load_dataset_webace,
-        "greek_legal_code":utils.load_dataset_greek_legal_code,
+        "greek_legal_code": utils.load_dataset_greek_legal_code,
         "test": utils.load_dataset_test,
-        "blobs":utils.load_dataset_blobs
+        "blobs": utils.load_dataset_blobs,
+        "makedonia": utils.load_dataset_makedonia,
+        "greeksum": utils.load_dataset_greeksum,
     }
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    #"tfidf",
-    #"spacy_model_embeddings",
+    "tfidf",
+    "spacy_model_embeddings",
     "sent_transformers_model_embeddings",
     #"jina_model_embeddings"   
 ]
@@ -64,10 +72,10 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     #"kmeans",
-     #"kmedoids",
-     #"agglomerative",
-     #"birch",
+     "kmeans",
+     "kmedoids",
+     "agglomerative",
+     "birch",
      "hdbscan"
 ]
 
@@ -110,7 +118,7 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters]
         ],
         "hdbscan":[
-            [n_clusters, 'eom'],
+            #[n_clusters, 'eom'],
             [n_clusters, 'leaf']
         ]
     }

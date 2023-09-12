@@ -4,11 +4,13 @@ import os
 import pickle
 import pandas as pd
 import numpy as np
-from DocClust.config import * 
+# from DocClust.config import * 
+import DocClust.config as config
 from scipy.io import arff, loadmat
 # import matplotlib
 # matplotlib.pyplot.ion()
 from matplotlib import pyplot as plt
+from collections import Counter
 
 
 def save_csv(dataset_name, vectorizer, n_clusters, all_eval_metric_values):
@@ -17,33 +19,33 @@ def save_csv(dataset_name, vectorizer, n_clusters, all_eval_metric_values):
     csv_scores = {}
     approachesList = []
     evaluation_metrics = []
-    for clustering_algorithms_string in clustering_algorithms_strings:
-        argumentsList = clustering_algorithms_arguments(n_clusters).get(clustering_algorithms_string)
-        parameters = clustering_algorithms_parameteres().get(clustering_algorithms_string)
+    for clustering_algorithms_string in config.clustering_algorithms_strings:
+        argumentsList = config.clustering_algorithms_arguments(n_clusters).get(clustering_algorithms_string)
+        parameters = config.clustering_algorithms_parameteres().get(clustering_algorithms_string)
         for arguments in argumentsList:
-            metrics_per_approach = all_eval_metric_values[start : start + len(evaluation_metrics_strings)]
+            metrics_per_approach = all_eval_metric_values[start : start + len(config.evaluation_metrics_strings)]
             evaluation_metrics.append(metrics_per_approach)
             approachesList.append(clust_algo_to_csv(clustering_algorithms_string, parameters, arguments))
-            start += len(evaluation_metrics_strings) 
+            start += len(config.evaluation_metrics_strings) 
             approaches_count += 1
 
-    array = np.zeros((len(evaluation_metrics_strings), approaches_count))
+    array = np.zeros((len(config.evaluation_metrics_strings), approaches_count))
     for i in range(len(all_eval_metric_values)):
-        inx1 = int(i%len(evaluation_metrics_strings))
-        inx2 = int(i/len(evaluation_metrics_strings))
+        inx1 = int(i%len(config.evaluation_metrics_strings))
+        inx2 = int(i/len(config.evaluation_metrics_strings))
         array[inx1][inx2] = round(all_eval_metric_values[i],2)
 
     csv_scores.update({"Approaches": approachesList}) 
 
-    for i in range(len(evaluation_metrics_strings)):
-        csv_scores.update({f"{evaluation_metrics_strings[i]}": list(array[i])}) 
+    for i in range(len(config.evaluation_metrics_strings)):
+        csv_scores.update({f"{config.evaluation_metrics_strings[i]}": list(array[i])}) 
         
     df = pd.DataFrame(csv_scores)
     csv_name = f'{dataset_name}_{vectorizer}.csv'
     
  
     # Write DataFrame to CSV File with Default params.
-    df.to_csv(os.path.join(csv_dir, csv_name), index = False) #, a_rep = 'null'
+    df.to_csv(os.path.join(config.csv_dir, csv_name), index = False) #, a_rep = 'null'
 
 
 def clust_algo_to_csv(clustering_algorithms_string, parameters, arguments):
@@ -55,11 +57,38 @@ def clust_algo_to_csv(clustering_algorithms_string, parameters, arguments):
         lambda x,y: f"{x}|{y}", [f"{clustering_algorithms_string}"] + [f"{a}:{b}" for a, b in zip(parameters, map(str, arguments))]   
     )
 
-def plot_histogram(x, binss):
-    plt.hist(x, density=False, bins = int(2*binss))  # density=False would make counts
+def plot_histogram(x_list, dataset_string):
+
+    value_counts = Counter(x_list)
+
+    # Separate the values and their counts
+    values = list(value_counts.keys())
+    counts = list(value_counts.values())
+    plt.bar(values, counts)
     plt.ylabel('Count')
-    plt.xlabel('values')
+    plt.xlabel('True Labels')
+    plt.title("".join(['True Labels Distribution for <<', dataset_string.upper(), ">>"]))
+    plt.grid(True)
+    for x, y in zip(values, counts):
+        plt.text(x, y, str(y), ha='center', va='bottom')
     plt.show()
+
+
+    # x = np.array(x_list)
+
+    # bins = np.arange(min(x_list) - 0.5, max(x_list) + 1.5, 1)
+
+    # plt.hist(x, density=False, bins = bins)  # density=False would make counts
+    # plt.ylabel('Frequency')
+    # plt.xlabel('True Labels')
+    # plt.title('True Labels Distribution for ' + dataset_string)
+    # plt.grid(True)
+
+    # bin_width = 0.5
+    # tick_positions = bins[:-1] + 0.5
+    # plt.xticks(tick_positions, bins[:-1].astype(int))
+
+    # plt.show()
 
 def create_serialized_vectors_dirs():
     """
@@ -70,12 +99,12 @@ def create_serialized_vectors_dirs():
     if not os.path.exists(path):
         os.makedirs(path)
 
-    for datasets_folder in datasets_strings:
+    for datasets_folder in config.datasets_strings:
         if not os.path.exists("".join([path,datasets_folder,"\\"])):
             os.makedirs("".join([path,datasets_folder,"\\"])) 
     
-    for datasets_folder in datasets_strings:
-        for vectorizer_folder in vectorizers_strings:
+    for datasets_folder in config.datasets_strings:
+        for vectorizer_folder in config.vectorizers_strings:
             if not os.path.exists("".join([path,datasets_folder,"\\",vectorizer_folder])):
                 os.makedirs("".join([path,datasets_folder,"\\",vectorizer_folder]))
 
@@ -130,7 +159,7 @@ def load_deselialized_vector(dataset_string, vectorizer_string):
 def load_dataset_arff(dataset_string):
 
     token_freq_vectors, labels_true, vocabulary = ([], [], [])
-    path_to_directory = local_datasets_path + dataset_string + "/"
+    path_to_directory = config.local_datasets_path + dataset_string + "/"
     file_arff = dataset_string + ".arff"
 
     with open(path_to_directory + file_arff , "r") as inFile:
@@ -158,7 +187,7 @@ def load_dataset_arff(dataset_string):
 
 def load_dataset_mat(dataset_string):
 
-    path_to_directory = local_datasets_path + dataset_string + "/"
+    path_to_directory = config.local_datasets_path + dataset_string + "/"
     file_mat = dataset_string + ".mat"
     # file_mat = "CSTR_coclustFormat" + ".mat"
     matlab_dict = loadmat(path_to_directory + file_mat)

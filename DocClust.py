@@ -10,24 +10,25 @@ import os
 
 
 
-#corp, lt_str, lt, ncl = utils.load_dataset_classic4()
+# corp, lt, ncl = utils.load_dataset_classic4()
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
 
 # Load Models to create embeddings
-[spacy_model_en, spacy_model_gr, sent_transformers_model, jina_model] = utils.load_models(config.vectorizers_strings)
+[spacy_model_en, spacy_model_gr, sent_transformers_model, bert_model_gr, jina_model] = utils.load_models(config.vectorizers_strings)
 
 # Main Loops
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
     # experiments.plot_histogram(labels_true)
 
-    # Choose proper Spacy Model
-    if dataset_string != "greek_legal_code":
+    # Choose proper Spacy & Bert Model
+    if config.datasets_language == "english":
         spacy_model = spacy_model_en
     else:
         spacy_model = spacy_model_gr
+        sent_transformers_model = bert_model_gr
 
     # Limit size of corpus
     if (config.limit_corpus_size > 1):
@@ -40,7 +41,7 @@ for dataset_string in config.datasets_strings:
 
     print("Corpus Size before clean: ", len(corpus))
     corpus, labels_true = utils.clean_corpus(corpus, labels_true)
-    experiments.plot_histogram(labels_true, n_clusters)
+    # experiments.plot_histogram(labels_true, dataset_string)
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ", len(corpus))
 
@@ -56,13 +57,13 @@ for dataset_string in config.datasets_strings:
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] + [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "sent_transformers_model_embeddings"): 
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] +[sent_transformers_model] + [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [sent_transformers_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "jina_model_embeddings"): 
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
@@ -89,11 +90,6 @@ for dataset_string in config.datasets_strings:
             print("\n\nReduce dimensions UMAP")
             print(f"X Size = {len(X)}")
             print(f"X Shape = {X.shape}\n\n")
-
-
-        # n_clusters = 3
-        # centers = [[1, 1], [-1, -1], [1, -1]]
-        # X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4, random_state=0)
 
         all_eval_metric_values = []
         for clustering_algorithms_string in config.clustering_algorithms_strings:

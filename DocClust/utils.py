@@ -8,8 +8,8 @@ import pandas as pd
 import functools
 import time
 import csv
-#import DocClust.config
 import DocClust.config as config
+import DocClust.experiments as experiments
 from tqdm import tqdm 
 import umap
 from sklearn.datasets import make_blobs
@@ -29,11 +29,15 @@ def load_models(vectorizers_strings):
     spacy_model_en = None
     spacy_model_gr = None
     sent_transformers_model = None
+    bert_model_gr = None
     jina_model = None
+
+    bert_model_gr = SentenceTransformer('nlpaueb/bert-base-greek-uncased-v1')
 
     if "spacy_model_embeddings" or "sent_transformers_model_embeddings" or "jina_model_embeddings"  in vectorizers_strings:
         spacy_model_en = spacy.load('en_core_web_lg')
         spacy_model_gr = spacy.load('el_core_news_lg')
+
         if "sent_transformers_model_embeddings" in vectorizers_strings:
             sent_transformers_model = SentenceTransformer(
                 model_name_or_path = 'sentence-transformers/all-mpnet-base-v2',
@@ -44,8 +48,8 @@ def load_models(vectorizers_strings):
                 model_name_or_path = 'jinaai/jina-embedding-l-en-v1',
                 device = 'cpu'
             )
-        
-    return [spacy_model_en, spacy_model_gr, sent_transformers_model, jina_model]
+
+    return [spacy_model_en, spacy_model_gr, sent_transformers_model, bert_model_gr, jina_model]
 
 
 def spacy_useful_token(token):
@@ -129,7 +133,7 @@ def tfidf(corpus, labels_true):
         lowercase = True,
         use_idf = True,
         norm = None,
-        stop_words = "english",
+        stop_words = None, #"english"
         max_df = 0.99,
         min_df = 0.01
         #max_features = 4#5250
@@ -147,6 +151,8 @@ def tfidf(corpus, labels_true):
             doc_indx.append(index)
 
     return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
+
+
 
 
 # ------------------------ REDUCE DIMENSIONALITY ------------------------ #
@@ -370,11 +376,31 @@ def load_dataset_pubmed4000():
 def load_dataset_classic4():
     classic4_path = "".join([config.local_datasets_path, "classic4\\classic4_more_than_500_bytes\\"])
     classic4_files = os.listdir(classic4_path)
-    corpus = [open(classic4_path + file_name, 'r').read() for file_name in classic4_files]
-    labels_true_str = ["".join([char for char in file_name if not char.isdigit()]).split(".")[0] for file_name in classic4_files]
-
+    #corpus = [open(classic4_path + file_name, 'r').read() for file_name in classic4_files]
+    #labels_true_str = ["".join([char for char in file_name if not char.isdigit()]).split(".")[0] for file_name in classic4_files]
+    corpus, labels_true_str = zip(*[(open(classic4_path + file_name, 'r').read(), "".join([char for char in file_name if not char.isdigit()]).split(".")[0]) for file_name in classic4_files ])
     labels_true, n_clusters = labels_str_to_int(labels_true_str)
-    return [corpus, labels_true, n_clusters]
+    return [list(corpus), labels_true, n_clusters]
+
+
+def load_dataset_greeksum():
+    """
+    GreeSum dataset (valid + test splits)
+    """
+    greeksum_path = "".join([config.local_datasets_path, "greeksum_test_valid\\"])
+    greeksum_csv_file = "greeksum_test_valid.csv"
+    corpus, labels_true = zip(*[(csv_row[0], int(csv_row[1])) for csv_row in csv.reader(open(greeksum_path + greeksum_csv_file, 'r', encoding='utf-8')) if csv_row[1].isdigit()])
+    return [list(corpus), list(labels_true), len(set(labels_true))]
+
+def load_dataset_makedonia():
+    """
+    GreeSum dataset (valid + test splits)
+    """
+    makedonia_path = "".join([config.local_datasets_path, "makedonia\\"])
+    makedonia_csv_file = "makedonia.csv"
+    corpus, labels_true_str = zip(*[(csv_row[0], csv_row[1]) for csv_row in csv.reader(open(makedonia_path + makedonia_csv_file, 'r', encoding='utf-8'))])
+    labels_true, n_clusters = labels_str_to_int(labels_true_str[1:])
+    return [list(corpus)[1:], list(labels_true), n_clusters]
 
 
 # ------------------------ GREEK DATASET ------------------------ #
@@ -440,3 +466,32 @@ def accepted_vector(vector, vector_type):
 def labels_str_to_int(labels_str):
     unique_labels_vals = set(labels_str)
     return [ list(unique_labels_vals).index(lab_str) for lab_str in labels_str], len(unique_labels_vals)
+
+
+# def create_vector(dataset_string, corpus, vectorizer_string, labels_true_corpus, spacy_model, sent_transformers_model, jina_model):
+#     if (vectorizer_string == "tfidf"): 
+#         if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+#             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+#         else:   
+#             X, labels_true  = wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [labels_true_corpus])
+#             experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+#     if (vectorizer_string == "spacy_model_embeddings"): 
+#         if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+#             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+#         else:
+#             X, labels_true  = wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [labels_true_corpus])
+#             experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+#     if (vectorizer_string == "sent_transformers_model_embeddings"): 
+#         if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+#             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+#         else:
+#             X, labels_true  = wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [sent_transformers_model] + [labels_true_corpus])
+#             experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+#     if (vectorizer_string == "jina_model_embeddings"): 
+#         if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+#             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+#         else:
+#             X, labels_true  = wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [jina_model] + [labels_true_corpus])
+#             experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+
+#     return X, labels_true
