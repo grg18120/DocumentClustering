@@ -7,41 +7,32 @@ import DocClust.experiments as experiments
 from matplotlib import pyplot as plt
 from sklearn.datasets import make_blobs
 import os
-
-
-
-# corp, lt, ncl = utils.load_dataset_classic4()
+import pickle
+                 
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
 
 # Load Models to create embeddings
-[spacy_model_en, spacy_model_gr, sent_transformers_model, bert_model_gr, jina_model] = utils.load_models(config.vectorizers_strings)
+# [spacy_model_en, spacy_model_gr, sent_transformers_model, bert_model_gr, jina_model] = utils.load_models(config.vectorizers_strings)
+(
+    spacy_model_en, 
+    spacy_model_gr, 
+    sent_transformers_model, 
+    jina_model, 
+    bert_model_gr, 
+    sent_transformers_paraph_multi_model_gr
+) = utils.load_models(config.vectorizers_strings)
 
 # Main Loops
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
     # experiments.plot_histogram(labels_true)
 
-    # Choose proper Spacy & Bert Model
-    if config.datasets_language == "english":
-        spacy_model = spacy_model_en
-    else:
-        spacy_model = spacy_model_gr
-        sent_transformers_model = bert_model_gr
-
-    # Limit size of corpus
-    if (config.limit_corpus_size > 1):
-        corpus_size = len(corpus)
-        test_sub_corpus = int(corpus_size / config.limit_corpus_size)
-        corpus = corpus[0:test_sub_corpus]
-        labels_true = labels_true[0:test_sub_corpus]
-        n_clusters = len(set(labels_true))
-        corpus_size = len(corpus)
 
     print("Corpus Size before clean: ", len(corpus))
     corpus, labels_true = utils.clean_corpus(corpus, labels_true)
-    # experiments.plot_histogram(labels_true, dataset_string)
+    experiments.plot_histogram(labels_true, dataset_string)
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ", len(corpus))
 
@@ -57,13 +48,13 @@ for dataset_string in config.datasets_strings:
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "sent_transformers_model_embeddings"): 
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
-                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model] + [sent_transformers_model] + [labels_true_corpus])
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_en] + [sent_transformers_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "jina_model_embeddings"): 
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
@@ -71,6 +62,22 @@ for dataset_string in config.datasets_strings:
             else:
                 X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [jina_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+
+        if (vectorizer_string == "greek_bert_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [bert_model_gr] + [labels_true_corpus])
+                experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+        if (vectorizer_string == "sent_transformers_paraph_multi_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [sent_transformers_paraph_multi_model_gr] + [labels_true_corpus])
+                experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+        if (vectorizer_string == "greek_bart_embeddings"): 
+            X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            
 
 
         print("\n\n*******************************************************************")

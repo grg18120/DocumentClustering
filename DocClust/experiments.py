@@ -64,11 +64,21 @@ def plot_histogram(x_list, dataset_string):
     # Separate the values and their counts
     values = list(value_counts.keys())
     counts = list(value_counts.values())
-    plt.bar(values, counts)
+
+    # Combine the two lists using zip
+    #combined_lists = list(zip(values, counts))
+    #sorted_combined_lists = sorted(list(zip(values, counts)), key=lambda x: x[0])
+    values_sorted, counts_sorted = zip(*sorted(list(zip(values, counts)), key=lambda x: x[0]))
+
+    plt.figure(figsize=(9, 4))
+    plt.bar(values_sorted, counts_sorted, width = 0.5)
+  
+    plt.xticks(values_sorted, values_sorted)
     plt.ylabel('Count')
     plt.xlabel('True Labels')
     plt.title("".join(['True Labels Distribution for <<', dataset_string.upper(), ">>"]))
     plt.grid(True)
+    plt.xticks(rotation=45)
     for x, y in zip(values, counts):
         plt.text(x, y, str(y), ha='center', va='bottom')
     plt.show()
@@ -116,37 +126,37 @@ def check_folder_size(dataset_string, vectorizer_string):
         
 
 def store_serialized_vector(dataset_string, vectorizer_string, vectors, labels_true):
-    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true"
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true.pkl"
     dbfile = open(file_path, "ab")
     pickle.dump(labels_true, dbfile)                     
     dbfile.close()
 
-    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape"
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape.pkl"
     dbfile = open(file_path, "ab")
     pickle.dump(vectors.shape, dbfile)                     
     dbfile.close()
 
     for indx, vector in enumerate(vectors):
-        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}"
+        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}.pkl"
         dbfile = open(file_path, "ab")
         pickle.dump(vector, dbfile)                     
         dbfile.close()
 
 
 def load_deselialized_vector(dataset_string, vectorizer_string):
-    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape"
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\shape.pkl"
     dbfile = open(file_path, 'rb')     
     shape = pickle.load(dbfile)
     dbfile.close()
 
-    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true"
+    file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\labels_true.pkl"
     dbfile = open(file_path, 'rb')     
     labels_true = pickle.load(dbfile)
     dbfile.close()
 
     arr = np.array([])
     for indx in range(shape[0]):
-        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}"
+        file_path = f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{indx}.pkl"
         dbfile = open(file_path, "rb")
         vector = pickle.load(dbfile)     
         arr = np.append(arr, vector)            

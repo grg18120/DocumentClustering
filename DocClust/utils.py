@@ -26,30 +26,44 @@ def load_models(vectorizers_strings):
     Function which loads pre-trained NLP models.
     This needs to run once since all models need a few seconds to load.
     """
-    spacy_model_en = None
-    spacy_model_gr = None
-    sent_transformers_model = None
-    bert_model_gr = None
-    jina_model = None
 
-    bert_model_gr = SentenceTransformer('nlpaueb/bert-base-greek-uncased-v1')
+    spacy_model_en = spacy_model_gr = None
+    sent_transformers_model = jina_model = None 
+    bert_model_gr = sent_transformers_paraph_multi_model_gr = None
 
-    if "spacy_model_embeddings" or "sent_transformers_model_embeddings" or "jina_model_embeddings"  in vectorizers_strings:
+    # Models for english datasets
+    if len([item for item in config.datasets_strings if item in config.datasets_en_strings]) > 0:
         spacy_model_en = spacy.load('en_core_web_lg')
+        sent_transformers_model = SentenceTransformer(
+            model_name_or_path = 'sentence-transformers/all-mpnet-base-v2',
+            device = 'cpu'
+        ) 
+        jina_model = SentenceTransformer(
+            model_name_or_path = 'jinaai/jina-embedding-l-en-v1',
+            device = 'cpu'
+        )
+
+    # Models for greek datasets
+    if len([item for item in config.datasets_strings if item in config.datasets_gr_strings]) > 0:
         spacy_model_gr = spacy.load('el_core_news_lg')
+        bert_model_gr = SentenceTransformer(
+            model_name_or_path = 'nlpaueb/bert-base-greek-uncased-v1',
+            device = 'cpu'
+        )
+        sent_transformers_paraph_multi_model_gr =  SentenceTransformer(
+        model_name_or_path = 'paraphrase-multilingual-mpnet-base-v2',
+            device = 'cpu'
+        )
+        # bart_model_gr
 
-        if "sent_transformers_model_embeddings" in vectorizers_strings:
-            sent_transformers_model = SentenceTransformer(
-                model_name_or_path = 'sentence-transformers/all-mpnet-base-v2',
-                device = 'cpu'
-            )
-        if "jina_model_embeddings" in vectorizers_strings:
-            jina_model = SentenceTransformer(
-                model_name_or_path = 'jinaai/jina-embedding-l-en-v1',
-                device = 'cpu'
-            )
-
-    return [spacy_model_en, spacy_model_gr, sent_transformers_model, bert_model_gr, jina_model]
+    return (
+        spacy_model_en, 
+        spacy_model_gr, 
+        sent_transformers_model, 
+        jina_model, 
+        bert_model_gr, 
+        sent_transformers_paraph_multi_model_gr
+    )
 
 
 def spacy_useful_token(token):
@@ -129,11 +143,16 @@ def jina_model_embeddings(corpus, jina_model, labels_true):
     return np.array(doc_vectors, dtype = object), [labels_true[x] for x in doc_indx]
 
 def tfidf(corpus, labels_true):
+    if config.datasets_language == "english":
+        stop_words = "english"
+    elif config.datasets_language == "greek":
+        stop_words = list(config.greek_stop_words)
+
     vectorizer = TfidfVectorizer(
         lowercase = True,
         use_idf = True,
         norm = None,
-        stop_words = None, #"english"
+        stop_words = stop_words, #"english"
         max_df = 0.99,
         min_df = 0.01
         #max_features = 4#5250
