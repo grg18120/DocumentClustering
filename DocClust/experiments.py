@@ -68,7 +68,7 @@ def plot_histogram(x_list, dataset_string):
     # Combine the two lists using zip
     #combined_lists = list(zip(values, counts))
     #sorted_combined_lists = sorted(list(zip(values, counts)), key=lambda x: x[0])
-    values_sorted, counts_sorted = zip(*sorted(list(zip(values, counts)), key=lambda x: x[0]))
+    values_sorted, counts_sorted = zip(*sorted(list(zip(values, counts)), key = lambda x: x[0]))
 
     plt.figure(figsize=(9, 4))
     plt.bar(values_sorted, counts_sorted, width = 0.5)
@@ -82,23 +82,7 @@ def plot_histogram(x_list, dataset_string):
     for x, y in zip(values, counts):
         plt.text(x, y, str(y), ha='center', va='bottom')
     plt.show()
-
-
-    # x = np.array(x_list)
-
-    # bins = np.arange(min(x_list) - 0.5, max(x_list) + 1.5, 1)
-
-    # plt.hist(x, density=False, bins = bins)  # density=False would make counts
-    # plt.ylabel('Frequency')
-    # plt.xlabel('True Labels')
-    # plt.title('True Labels Distribution for ' + dataset_string)
-    # plt.grid(True)
-
-    # bin_width = 0.5
-    # tick_positions = bins[:-1] + 0.5
-    # plt.xticks(tick_positions, bins[:-1].astype(int))
-
-    # plt.show()
+    
 
 def create_serialized_vectors_dirs():
     """

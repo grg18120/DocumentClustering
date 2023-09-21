@@ -18,6 +18,7 @@ from kneed import KneeLocator
 from matplotlib import pyplot as plt
 from datasets import load_dataset
 import os
+from collections import Counter
 
 
 # ------------------------ EMBEDDINGS - WORD VECTORS ------------------------ #
@@ -413,13 +414,56 @@ def load_dataset_greeksum():
 
 def load_dataset_makedonia():
     """
-    GreeSum dataset (valid + test splits)
+    Makedonia dataset
     """
     makedonia_path = "".join([config.local_datasets_path, "makedonia\\"])
     makedonia_csv_file = "makedonia.csv"
     corpus, labels_true_str = zip(*[(csv_row[0], csv_row[1]) for csv_row in csv.reader(open(makedonia_path + makedonia_csv_file, 'r', encoding='utf-8'))])
-    labels_true, n_clusters = labels_str_to_int(labels_true_str[1:])
-    return [list(corpus)[1:], list(labels_true), n_clusters]
+
+    labels_count = Counter(labels_true_str)
+    labels_8_most_freq = sorted(labels_count, key = labels_count.get, reverse = True)[:8]
+
+    corpus_8, labels_true_str_8 = zip(*[(doc, labels_true_str[indx]) for indx, doc in enumerate(corpus) if labels_true_str[indx] in labels_8_most_freq])
+    labels_true_8, n_clusters_8 = labels_str_to_int(labels_true_str_8)
+
+
+    # corpus = corpus[1:]
+    # labels_true_str = labels_true_str[1:]
+
+    # corpus_8 = []
+    # labels_true_str_8 = []
+    # indx_removed = []
+    # for indx, doc in enumerate(corpus):
+    #     if labels_true_str[indx] in labels_8_most_freq:
+    #         corpus_8.append(doc)
+    #         labels_true_str_8.append(labels_true_str[indx])
+    #     else:               
+    #         indx_removed.append(indx)
+
+    # dataset_string = "makedonia"
+    # vectorizer_string = "greek_bart_model_embeddings"
+    # for ind in indx_removed:
+    #     os.remove(f"precomputed_vectors\\{dataset_string}\\{vectorizer_string}\\{ind}.pkl" )
+
+    # for i in range(7269):
+    #     print(i)
+    # p = "C:\\Users\\George Georgariou\\Documents\\Visual Studio Code\\DocumentClustering\\precomputed_vectors\\makedonia\\greek_bart_model_embeddings\\"
+    # files = os.listdir(p)
+    # files_sorted = os.listdir(p)
+    # def nn(element):
+    #     return int(element.split(".")[0])
+    # files_sorted.sort(key = nn)
+
+    # for i in range(len(files_sorted)):
+    #     old_name = p + files_sorted[i]
+    #     new_name = p + str(i) + ".pkl"
+
+    #     # Renaming the file
+    #     os.rename(old_name, new_name)
+
+    # return [list(corpus_8), list(labels_true_8), n_clusters_8, indx_removed]
+
+    return [list(corpus_8), list(labels_true_8), n_clusters_8]
 
 
 # ------------------------ GREEK DATASET ------------------------ #

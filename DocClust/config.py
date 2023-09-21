@@ -35,8 +35,8 @@ datasets_strings = [
     #"classic4",
 
     #"greek_legal_code"
-    #"greeksum",
-    "makedonia",
+    "greeksum",
+    #"makedonia",
 ]
 
 datasets_en_strings = [
@@ -76,13 +76,15 @@ def datasets_pointers():
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
     #"tfidf",
+
     #"spacy_model_embeddings",
     #"sent_transformers_model_embeddings",
     #"jina_model_embeddings",
 
-    "greek_bert_model_embeddings",
-    "sent_transformers_paraph_multi_model_embeddings",
-    # "greek_bart_model_embeddings" 
+    # "greek_bert_model_embeddings",
+    #"sent_transformers_paraph_multi_model_embeddings",
+    "greek_bart_model_embeddings",
+    #"greek_spacy_model_embeddings" 
 ]
 
 def vectorizers_pointers():
@@ -95,6 +97,7 @@ def vectorizers_pointers():
         "greek_bert_model_embeddings": utils.sent_transformers_model_embeddings,
         "sent_transformers_paraph_multi_model_embeddings": utils.sent_transformers_model_embeddings,
         "greek_bart_model_embeddings": utils.sent_transformers_model_embeddings,
+        "greek_spacy_model_embeddings": utils.spacy_model_embeddings,
     }
 
 

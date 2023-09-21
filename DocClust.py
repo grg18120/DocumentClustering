@@ -8,7 +8,10 @@ from matplotlib import pyplot as plt
 from sklearn.datasets import make_blobs
 import os
 import pickle
-                 
+
+
+# cor, lab_tr, n_clusters, indx_removed  = utils.load_dataset_makedonia()   
+   
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
@@ -32,7 +35,7 @@ for dataset_string in config.datasets_strings:
 
     print("Corpus Size before clean: ", len(corpus))
     corpus, labels_true = utils.clean_corpus(corpus, labels_true)
-    experiments.plot_histogram(labels_true, dataset_string)
+    # experiments.plot_histogram(labels_true, dataset_string)
     labels_true_corpus = labels_true[:]
     print("Corpus Size After clean: ", len(corpus))
 
@@ -63,6 +66,13 @@ for dataset_string in config.datasets_strings:
                 X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [jina_model] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
 
+
+        if (vectorizer_string == "greek_spacy_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [labels_true_corpus])
+                experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "greek_bert_model_embeddings"): 
             if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
@@ -75,7 +85,7 @@ for dataset_string in config.datasets_strings:
             else:
                 X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [sent_transformers_paraph_multi_model_gr] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
-        if (vectorizer_string == "greek_bart_embeddings"): 
+        if (vectorizer_string == "greek_bart_model_embeddings"): 
             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             
 
