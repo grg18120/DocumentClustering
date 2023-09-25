@@ -11,7 +11,8 @@ import pickle
 
 
 # cor, lab_tr, n_clusters, indx_removed  = utils.load_dataset_makedonia()   
-   
+cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code()
+
 
 # Create directories if they doesnt exist to store vectors-embedding 
 experiments.create_serialized_vectors_dirs()
@@ -30,7 +31,6 @@ experiments.create_serialized_vectors_dirs()
 # Main Loops
 for dataset_string in config.datasets_strings:
     [corpus, labels_true, n_clusters]  = utils.wrapper(config.datasets_pointers().get(dataset_string))
-    # experiments.plot_histogram(labels_true)
 
 
     print("Corpus Size before clean: ", len(corpus))

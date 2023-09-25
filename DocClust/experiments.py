@@ -57,6 +57,7 @@ def clust_algo_to_csv(clustering_algorithms_string, parameters, arguments):
         lambda x,y: f"{x}|{y}", [f"{clustering_algorithms_string}"] + [f"{a}:{b}" for a, b in zip(parameters, map(str, arguments))]   
     )
 
+
 def plot_histogram(x_list, dataset_string):
 
     value_counts = Counter(x_list)

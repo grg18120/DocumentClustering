@@ -466,13 +466,32 @@ def load_dataset_makedonia():
     return [list(corpus_8), list(labels_true_8), n_clusters_8]
 
 
+def load_dataset_greek_legal_sum():
+    dataset = load_dataset("DominusTea/GreekLegalSum", split = "train")
+
+    corpus, labels_true_str  = zip(*[(x.get("text"), x.get("case_category")) for x in dataset])
+
+    labels_count = Counter(labels_true_str)
+
+    corpus_800, labels_true_str_800 = zip(*[(doc, labels_true_str[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true_str[indx]) > 800 and labels_true_str[indx] is not None])
+    labels_true_800, n_clusters_800 = labels_str_to_int(labels_true_str_800)
+
+    return [list(corpus_800), list(labels_true_800), n_clusters_800]
+
+
 # ------------------------ GREEK DATASET ------------------------ #
 
 def load_dataset_greek_legal_code():
-    dataset = load_dataset("greek_legal_code", "volume", split = "train+test+validation")
+    dataset = load_dataset("greek_legal_code", "volume", split = "test+validation")
     corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
     n_clusters = len(set(labels_true))
 
+    labels_count = Counter(labels_true)
+
+    corpus_400, labels_true_400 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) > 400 and labels_true[indx] is not None])
+
+
+    experiments.plot_histogram(list(labels_true_400), "greek_legal_code")
     return [list(corpus), list(labels_true), n_clusters]
 
 
