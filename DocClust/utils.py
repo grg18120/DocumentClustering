@@ -55,6 +55,10 @@ def load_models(vectorizers_strings):
         model_name_or_path = 'paraphrase-multilingual-mpnet-base-v2',
             device = 'cpu'
         )
+        xlm_roberta_model_gr =  SentenceTransformer(
+        model_name_or_path = 'paraphrase-multilingual-mpnet-base-v2',
+            device = 'cpu'
+        )
         # bart_model_gr
 
     return (
@@ -63,7 +67,8 @@ def load_models(vectorizers_strings):
         sent_transformers_model, 
         jina_model, 
         bert_model_gr, 
-        sent_transformers_paraph_multi_model_gr
+        sent_transformers_paraph_multi_model_gr,
+        xlm_roberta_model_gr
     )
 
 
@@ -504,21 +509,21 @@ def load_dataset_greek_legal_code_more_500():
     corpus_500, labels_true_500 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) > 500 and labels_true[indx] is not None])
     n_clusters = len(set(labels_true_500))
 
-    experiments.plot_histogram(list(labels_true_500), "greek_legal_code_500")
+    # experiments.plot_histogram(list(labels_true_500), "greek_legal_code_500")
     return [list(corpus_500), list(labels_true_500), n_clusters]
 
 
-def load_dataset_greek_legal_code_less_600():
+def load_dataset_greek_legal_code_less_500():
     dataset = load_dataset("greek_legal_code", "volume", split = "test+validation")
     corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
 
     labels_count = Counter(labels_true)
 
-    corpus_600, labels_true_600 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) < 600 and labels_true[indx] is not None])
-    n_clusters = len(set(labels_true_600))
+    corpus_500, labels_true_500 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) < 500 and labels_true[indx] is not None])
+    n_clusters = len(set(labels_true_500))
 
-    experiments.plot_histogram(list(labels_true_600), "greek_legal_code_600")
-    return [list(corpus_600), list(labels_true_600), n_clusters]
+    # experiments.plot_histogram(list(labels_true_500), "greek_legal_code_500")
+    return [list(corpus_500), list(labels_true_500), n_clusters]
 
 
 

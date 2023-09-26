@@ -11,7 +11,7 @@ import pickle
 
 
 # cor, lab_tr, n_clusters, indx_removed  = utils.load_dataset_makedonia()   
-# cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code_less_600()
+# cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code_less_500()
 
 
 # Create directories if they doesnt exist to store vectors-embedding 
@@ -25,7 +25,8 @@ experiments.create_serialized_vectors_dirs()
     sent_transformers_model, 
     jina_model, 
     bert_model_gr, 
-    sent_transformers_paraph_multi_model_gr
+    sent_transformers_paraph_multi_model_gr,
+    xlm_roberta_model_gr
 ) = utils.load_models(config.vectorizers_strings)
 
 # Main Loops
@@ -84,6 +85,12 @@ for dataset_string in config.datasets_strings:
                 X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
             else:
                 X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [sent_transformers_paraph_multi_model_gr] + [labels_true_corpus])
+                experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
+        if (vectorizer_string == "greek_xlm_roberta_model_embeddings"): 
+            if (experiments.check_folder_size(dataset_string, vectorizer_string) > 1000):
+                X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
+            else:
+                X, labels_true  = utils.wrapper_args(config.vectorizers_pointers().get(vectorizer_string), [corpus] + [spacy_model_gr] + [xlm_roberta_model_gr] + [labels_true_corpus])
                 experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
         if (vectorizer_string == "greek_bart_model_embeddings"): 
             X, labels_true = experiments.load_deselialized_vector(dataset_string, vectorizer_string)
