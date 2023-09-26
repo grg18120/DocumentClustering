@@ -11,7 +11,7 @@ import pickle
 
 
 # cor, lab_tr, n_clusters, indx_removed  = utils.load_dataset_makedonia()   
-cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code()
+# cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code_less_600()
 
 
 # Create directories if they doesnt exist to store vectors-embedding 

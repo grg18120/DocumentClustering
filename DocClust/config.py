@@ -34,7 +34,8 @@ datasets_strings = [
     #"pubmed4000",
     #"classic4",
 
-    "greek_legal_code"
+    "greek_legal_code_more_500",
+    "greek_legal_code_less_600",
     #"greeksum",
     #"makedonia",
     #"greek_legal_sum"
@@ -52,7 +53,8 @@ datasets_en_strings = [
 ]
 
 datasets_gr_strings = [
-    "greek_legal_code",
+    "greek_legal_code_more_500",
+    "greek_legal_code_less_600"
     "makedonia",
     "greeksum",
     "greek_legal_sum",
@@ -71,7 +73,8 @@ def datasets_pointers():
         
         "test": utils.load_dataset_test,
         "blobs": utils.load_dataset_blobs,
-        "greek_legal_code": utils.load_dataset_greek_legal_code,
+        "greek_legal_code_more_500": utils.load_dataset_greek_legal_code_more_500,
+        "greek_legal_code_less_600": utils.load_dataset_greek_legal_code_less_600,
         "makedonia": utils.load_dataset_makedonia,
         "greeksum": utils.load_dataset_greeksum,
         "greek_legal_sum": utils.load_dataset_greek_legal_sum
@@ -79,16 +82,16 @@ def datasets_pointers():
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    "tfidf",
+    #"tfidf",
 
     #"spacy_model_embeddings",
     #"sent_transformers_model_embeddings",
     #"jina_model_embeddings",
 
     "greek_bert_model_embeddings",
-    "sent_transformers_paraph_multi_model_embeddings",
+    #"sent_transformers_paraph_multi_model_embeddings",
     #"greek_bart_model_embeddings",
-    "greek_spacy_model_embeddings" 
+    #"greek_spacy_model_embeddings" 
 ]
 
 def vectorizers_pointers():

@@ -494,6 +494,34 @@ def load_dataset_greek_legal_code():
     experiments.plot_histogram(list(labels_true_400), "greek_legal_code")
     return [list(corpus), list(labels_true), n_clusters]
 
+def load_dataset_greek_legal_code_more_500():
+    dataset = load_dataset("greek_legal_code", "volume", split = "test+validation")
+    corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
+    
+
+    labels_count = Counter(labels_true)
+
+    corpus_500, labels_true_500 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) > 500 and labels_true[indx] is not None])
+    n_clusters = len(set(labels_true_500))
+
+    experiments.plot_histogram(list(labels_true_500), "greek_legal_code_500")
+    return [list(corpus_500), list(labels_true_500), n_clusters]
+
+
+def load_dataset_greek_legal_code_less_600():
+    dataset = load_dataset("greek_legal_code", "volume", split = "test+validation")
+    corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
+
+    labels_count = Counter(labels_true)
+
+    corpus_600, labels_true_600 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) < 600 and labels_true[indx] is not None])
+    n_clusters = len(set(labels_true_600))
+
+    experiments.plot_histogram(list(labels_true_600), "greek_legal_code_600")
+    return [list(corpus_600), list(labels_true_600), n_clusters]
+
+
+
 
 
 
