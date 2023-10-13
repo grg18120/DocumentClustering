@@ -11,7 +11,7 @@ import pickle
 
 
 # cor, lab_tr, n_clusters, indx_removed  = utils.load_dataset_makedonia()   
-# cor, lab_tr, n_clusters = utils.load_dataset_greek_legal_code_less_500()
+# cor, lab_tr, n_clusters = utils.load_dataset_greek_ogtd()
 
 
 # Create directories if they doesnt exist to store vectors-embedding 
@@ -114,6 +114,8 @@ for dataset_string in config.datasets_strings:
             print("\n\nReduce dimensions UMAP")
             print(f"X Size = {len(X)}")
             print(f"X Shape = {X.shape}\n\n")
+
+        utils.save_plots(X, n_clusters, dataset_string, vectorizer_string, labels_true)
 
         all_eval_metric_values = []
         for clustering_algorithms_string in config.clustering_algorithms_strings:

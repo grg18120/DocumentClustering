@@ -31,6 +31,7 @@ def load_models(vectorizers_strings):
     spacy_model_en = spacy_model_gr = None
     sent_transformers_model = jina_model = None 
     bert_model_gr = sent_transformers_paraph_multi_model_gr = None
+    xlm_roberta_model_gr = None
 
     # Models for english datasets
     if len([item for item in config.datasets_strings if item in config.datasets_en_strings]) > 0:
@@ -484,6 +485,16 @@ def load_dataset_greek_legal_sum():
     return [list(corpus_800), list(labels_true_800), n_clusters_800]
 
 
+def load_dataset_greek_ogtd():
+
+    ogtd_path = "".join([config.local_datasets_path, "ogtd\\"])
+    ogtd_csv_file = "ogtd.csv"
+    corpus, labels_true_str = zip(*[(csv_row[2], csv_row[3]) for csv_row in csv.reader(open(ogtd_path + ogtd_csv_file, 'r', encoding='utf-8')) if csv_row[0].isnumeric()])
+    labels_true, n_clusters = labels_str_to_int(labels_true_str)
+    # experiments.plot_histogram(labels_true, "ogtd")
+    return [list(corpus), list(labels_true), n_clusters]
+
+
 # ------------------------ GREEK DATASET ------------------------ #
 
 def load_dataset_greek_legal_code():
@@ -524,6 +535,19 @@ def load_dataset_greek_legal_code_less_500():
 
     # experiments.plot_histogram(list(labels_true_500), "greek_legal_code_500")
     return [list(corpus_500), list(labels_true_500), n_clusters]
+
+
+def load_dataset_greek_legal_code_400_600():
+    dataset = load_dataset("greek_legal_code", "volume", split = "test+validation")
+    corpus, labels_true  = zip(*[(x["text"], x["label"]) for x in  dataset])
+
+    labels_count = Counter(labels_true)
+
+    corpus_400_600, labels_true_400_600 = zip(*[(doc, labels_true[indx]) for indx, doc in enumerate(corpus) if labels_count.get(labels_true[indx]) < 600 and labels_count.get(labels_true[indx]) > 400 and labels_true[indx] is not None])
+    n_clusters = len(set(labels_true_400_600))
+
+    experiments.plot_histogram(list(labels_true_400_600), "greek_legal_code_400_600")
+    return [list(corpus_400_600), list(labels_true_400_600), n_clusters]
 
 
 
@@ -610,3 +634,56 @@ def labels_str_to_int(labels_str):
 #             experiments.store_serialized_vector(dataset_string, vectorizer_string, X, labels_true)
 
 #     return X, labels_true
+
+
+import plotly.express as px
+from sklearn_extra.cluster import KMedoids
+from sklearn.manifold import TSNE
+
+def save_plots(X, n_clusters, dataset_string, vectorizer_string, labels_true):
+    # # Create the clustering object.
+    # clustering = KMedoids(
+    #     n_clusters = n_clusters, 
+    #     metric = 'cosine', 
+    #     init = 'k-medoids++', 
+    #     method = 'pam', 
+    #     max_iter = 300, 
+    #     random_state = config.random_state
+    # )
+
+    # # Train k-medoids using the current k value.
+    # clustering.fit(X)
+
+    # # Extract all the labels from k-medoids for each embedding.
+    # labels_pred = clustering.labels_
+
+    labels_pred = labels_true
+
+
+    # Render and save the TSNE 2D plot for the current k value.
+    tsne = TSNE(n_components = 2, perplexity = 20, random_state = config.random_state) 
+    tsne_embeddings = tsne.fit_transform(X)
+
+    fig = px.scatter(x = tsne_embeddings[:, 0], y = tsne_embeddings[:, 1], color = list(map(str, labels_pred)))
+    fig.update_layout(
+        title = 't-SNE 2D visualization',
+        xaxis_title = 'X-dimension',
+        yaxis_title = 'Y-dimension'
+    )
+    fig.write_image(os.path.join(config.figures_dir, f'tsne_{dataset_string}_{vectorizer_string}_{n_clusters}.png'))
+
+
+
+    umap_reduce = umap.UMAP(n_components = 2, random_state = config.random_state)
+
+    umap_embeddings = umap_reduce.fit_transform(X)
+
+    fig2 = px.scatter(x = umap_embeddings[:, 0], y = umap_embeddings[:, 1], color = list(map(str, labels_pred)))
+    fig2.update_layout(
+        title = 'umap 2D visualization',
+        xaxis_title = 'X-dimension',
+        yaxis_title = 'Y-dimension'
+    )
+    fig2.write_image(os.path.join(config.figures_dir, f'umap_{dataset_string}_{vectorizer_string}_{n_clusters}.png'))
+
+    print(1)

@@ -20,25 +20,26 @@ random_state = 42
 
 # ------------------------ Datasets - Corpus ------------------------ #
 
-datasets_language = "greek"#"english"#
+datasets_language = "english"#"english"#
 
 datasets_strings = [
     #"test"
     #"blobs"
 
     #"20newsgroups",
-
-    #"reuters21578",
-    #"trec",
+    "reuters21578",
+    "trec",
     #"webace"
-    #"pubmed4000",
-    #"classic4",
+    "pubmed4000",
+    "classic4",
 
-    "greek_legal_code_more_500",
-    "greek_legal_code_less_500",
-    #"greeksum",
+    #"greek_legal_code_more_500",
+    #"greek_legal_code_less_500",
     #"makedonia",
-    #"greek_legal_sum"
+    #"greeksum",
+    #"greek_legal_code_400_600",
+    #"greek_legal_sum",
+    #"ogtd"
 ]
 
 datasets_en_strings = [
@@ -53,11 +54,14 @@ datasets_en_strings = [
 ]
 
 datasets_gr_strings = [
+    "greek_legal_code_more_600",
     "greek_legal_code_more_500",
-    "greek_legal_code_less_500"
+    "greek_legal_code_less_500",
+    "greek_legal_code_400_600",
     "makedonia",
     "greeksum",
     "greek_legal_sum",
+    "ogtd"
 ]
 
 
@@ -73,23 +77,25 @@ def datasets_pointers():
         
         "test": utils.load_dataset_test,
         "blobs": utils.load_dataset_blobs,
-        
+
         "greek_legal_code_more_500": utils.load_dataset_greek_legal_code_more_500,
         "greek_legal_code_less_500": utils.load_dataset_greek_legal_code_less_500,
+        "greek_legal_code_400_600": utils.load_dataset_greek_legal_code_400_600,
         "makedonia": utils.load_dataset_makedonia,
         "greeksum": utils.load_dataset_greeksum,
-        "greek_legal_sum": utils.load_dataset_greek_legal_sum
+        "greek_legal_sum": utils.load_dataset_greek_legal_sum,
+        "ogtd": utils.load_dataset_greek_ogtd
     }
 
 # ------------------------ Embeddings - Doc Vectors ------------------------ #
 vectorizers_strings = [
-    #"tfidf",
+    "tfidf",
 
     #"spacy_model_embeddings",
-    #"sent_transformers_model_embeddings",
-    #"jina_model_embeddings",
+    "sent_transformers_model_embeddings",
+    "jina_model_embeddings",
 
-    "greek_bert_model_embeddings",
+    #"greek_bert_model_embeddings",
     #"sent_transformers_paraph_multi_model_embeddings",
     #"greek_bart_model_embeddings",
     #"greek_spacy_model_embeddings" ,
@@ -113,11 +119,11 @@ def vectorizers_pointers():
 
 # ------------------------ Clustering Algorithms ------------------------ #
 clustering_algorithms_strings = [
-     "kmeans",
+     #"kmeans",
      "kmedoids",
-     "agglomerative",
-     "birch",
-     "hdbscan"
+     #"agglomerative",
+     #"birch",
+     #"hdbscan"
 ]
 
 # Config Clustering algorithm approaches
@@ -144,10 +150,10 @@ def clustering_algorithms_arguments(n_clusters):
             [n_clusters, 'lloyd', 'k-means++']
         ],
         "kmedoids":[
-            [n_clusters, 'pam', 'build'],
-            [n_clusters, 'pam', 'k-medoids++'],
-            [n_clusters, 'alternate', 'build'],
-            [n_clusters, 'alternate', 'k-medoids++']
+            #[n_clusters, 'pam', 'build'],
+            #[n_clusters, 'pam', 'k-medoids++'],
+            #[n_clusters, 'alternate', 'build'],
+            #[n_clusters, 'alternate', 'k-medoids++']
         ],
         "agglomerative": [
             [n_clusters, True, 'ward', 'euclidean'],
